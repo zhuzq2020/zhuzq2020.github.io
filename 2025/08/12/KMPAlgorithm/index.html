@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>KMP算法详解 | Blog</title><meta name="author" content="zaki"><meta name="copyright" content="zaki"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="为什么使用KMP解决问题：在主串“SSSSSSSSSSSSSSSSSSSSSSSA”中查找”SSB”，比较到最后一个才知道不匹配，然后回溯，效率低。 KMP优势分析子串n本身的特点（生成next数组），在主串m查找子串的时候，不需要重头遍历，从有重复部分的地方开始遍历即可。时间复杂度：O(m+n) 暴力查找遍历的时间复杂度：O(mn) 如何使用KMP生成next数组生成next数组最重要的就是：前">
+<meta property="og:type" content="article">
+<meta property="og:title" content="KMP算法详解">
+<meta property="og:url" content="http://example.com/2025/08/12/KMPAlgorithm/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="为什么使用KMP解决问题：在主串“SSSSSSSSSSSSSSSSSSSSSSSA”中查找”SSB”，比较到最后一个才知道不匹配，然后回溯，效率低。 KMP优势分析子串n本身的特点（生成next数组），在主串m查找子串的时候，不需要重头遍历，从有重复部分的地方开始遍历即可。时间复杂度：O(m+n) 暴力查找遍历的时间复杂度：O(mn) 如何使用KMP生成next数组生成next数组最重要的就是：前">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/img/butterfly-icon.jpg">
+<meta property="article:published_time" content="2025-08-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-12T07:06:49.245Z">
+<meta property="article:author" content="zaki">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/butterfly-icon.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "KMP算法详解",
+  "url": "http://example.com/2025/08/12/KMPAlgorithm/",
+  "image": "http://example.com/img/butterfly-icon.jpg",
+  "datePublished": "2025-08-11T16:00:00.000Z",
+  "dateModified": "2025-08-12T07:06:49.245Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zaki",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2025/08/12/KMPAlgorithm/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'KMP算法详解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">KMP算法详解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  Back to Home</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">KMP算法详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-08-11T16:00:00.000Z" title="Created 2025-08-12 00:00:00">2025-08-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-08-12T07:06:49.245Z" title="Updated 2025-08-12 15:06:49">2025-08-12</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="为什么使用KMP"><a href="#为什么使用KMP" class="headerlink" title="为什么使用KMP"></a>为什么使用KMP</h1><p>解决问题：在主串“SSSSSSSSSSSSSSSSSSSSSSSA”中查找”SSB”，比较到最后一个才知道不匹配，然后回溯，效率低。</p>
+<h1 id="KMP优势"><a href="#KMP优势" class="headerlink" title="KMP优势"></a>KMP优势</h1><p>分析子串n本身的特点（生成next数组），在主串m查找子串的时候，不需要重头遍历，从有重复部分的地方开始遍历即可。时间复杂度：O(m+n)</p>
+<p>暴力查找遍历的时间复杂度：O(mn)</p>
+<h1 id="如何使用KMP"><a href="#如何使用KMP" class="headerlink" title="如何使用KMP"></a>如何使用KMP</h1><h2 id="生成next数组"><a href="#生成next数组" class="headerlink" title="生成next数组"></a>生成next数组</h2><p>生成next数组最重要的就是：前缀和后缀相同的字符个数（找到相同个数的字符串，后面使用KMP回溯时，就可以快速回溯到特征字符串，避免每次都回溯到第一个字符）</p>
+<h3 id="什么是前后缀"><a href="#什么是前后缀" class="headerlink" title="什么是前后缀"></a>什么是前后缀</h3><p>将字符串从中间一分为二，前面为前缀，后面为后缀。<br>举例：<br>“ABCDABC”前缀为“ABC”，后缀也为“ABC”<br>“ABCD”前缀为“AB”，后缀为“CD”<br>next数组就是存放的到j位置，前后缀相同字符的个数。<br>举例：<br>“ABCDABC”<br>next[] &#x3D; {0，0，0，0，1，2，3}<br>其中取next[5]为例<br>截取字符：ABCDAB，其中前缀“ABC”和后缀“DAB”有相同字符“AB”，长度为2，即next[5] &#x3D; 2。</p>
+<h3 id="生成next数组代码如下"><a href="#生成next数组代码如下" class="headerlink" title="生成next数组代码如下"></a>生成next数组代码如下</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">findNext</span><span class="params">(std::vector&lt;<span class="type">int</span>&gt;&amp; next, std::string pattern)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">1</span>, j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; pattern.<span class="built_in">length</span>()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pattern[i] == pattern[j]) &#123;</span><br><span class="line">            j++;</span><br><span class="line">            next[i] = j;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (j == <span class="number">0</span>) &#123;</span><br><span class="line">            next[i] = <span class="number">0</span>;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            j = next[j<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="KMP使用"><a href="#KMP使用" class="headerlink" title="KMP使用"></a>KMP使用</h2><p>将主串（下标i）和子串（下表j）进行比较。<br>i一直递增。<br>如果主串下标i处与子串下标j处相同，则j递增；<br>否则j回溯到next[j-1]处。<br>因为next是存放的是：截至到下标处相同的字符串个数。所以j要回溯到next[j-1]处。<br>举例<br>主串：“ABABCABABD”<br>子串：“ABABD”<br>i &#x3D; 4, j &#x3D; 4时，字符串不相同，此时j需要开始回溯。<br><img src="/KMPAlgorithm/KMPAlgorithm.jpg" alt="子串回溯"><br>原理：<br>第一次匹配j之前有n个相同的字符（后缀）；<br>第二次匹配的时候，就取子串前n个字符（前缀）。<br>这也是为什么要找前后相同的字符串个数的原因。</p>
+<h3 id="KMP实现代码"><a href="#KMP实现代码" class="headerlink" title="KMP实现代码"></a>KMP实现代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">search</span><span class="params">(std::string text, std::string pattern, std::vector&lt;<span class="type">int</span>&gt; next)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> ( i &lt; text.<span class="built_in">length</span>() &amp;&amp; j &lt; pattern.<span class="built_in">length</span>()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (text[i] == pattern[j]) &#123;</span><br><span class="line">            <span class="keyword">if</span> (j == pattern.<span class="built_in">length</span>() - <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> i - (pattern.<span class="built_in">length</span>() - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!j) &#123;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            j = next[j - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="测试用例"><a href="#测试用例" class="headerlink" title="测试用例"></a>测试用例</h1><ol>
+<li>寻找主串中子串位置。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::string text = <span class="string">&quot;ABABDABACDABABCABAB&quot;</span>;</span><br><span class="line">    std::string pattern = <span class="string">&quot;ABABCABAB&quot;</span>;</span><br><span class="line">    <span class="function">std::vector&lt;<span class="type">int</span>&gt; <span class="title">next</span><span class="params">(pattern.length())</span></span>;</span><br><span class="line">    <span class="built_in">findNext</span>(next, pattern);</span><br><span class="line">    <span class="type">int</span> positions = <span class="built_in">search</span>(text, pattern, next);</span><br><span class="line">    std::cout &lt;&lt; positions;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>214最短回文串</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">search</span><span class="params">(std::string text, std::string pattern, std::vector&lt;<span class="type">int</span>&gt; next)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; text.<span class="built_in">length</span>() &amp;&amp; j &lt; pattern.<span class="built_in">length</span>()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (text[i] == pattern[j]) &#123;</span><br><span class="line">            <span class="keyword">if</span> (j == pattern.<span class="built_in">length</span>() - <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> pattern.<span class="built_in">length</span>();</span><br><span class="line">            &#125;</span><br><span class="line">            i++;</span><br><span class="line">            j++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!j) &#123;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            j = next[j - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> j;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">findNext</span><span class="params">(std::vector&lt;<span class="type">int</span>&gt;&amp; next, std::string pattern)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">1</span>, j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; pattern.<span class="built_in">length</span>()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pattern[i] == pattern[j]) &#123;</span><br><span class="line">            j++;</span><br><span class="line">            next[i] = j;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (j == <span class="number">0</span>) &#123;</span><br><span class="line">            next[i] = <span class="number">0</span>;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            j = next[j<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::string s = <span class="string">&quot;abcd&quot;</span>;</span><br><span class="line">    <span class="function">std::vector&lt;<span class="type">int</span>&gt; <span class="title">next</span><span class="params">(s.length())</span></span>;</span><br><span class="line">    <span class="built_in">findNext</span>(next, s);</span><br><span class="line">    std::string s2 = s;</span><br><span class="line">    std::<span class="built_in">reverse</span>(s<span class="number">2.</span><span class="built_in">begin</span>(), s<span class="number">2.</span><span class="built_in">end</span>());</span><br><span class="line">    <span class="type">int</span> positions = <span class="built_in">search</span>(s2, s, next);</span><br><span class="line">    std::cout &lt;&lt; positions;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">zaki</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2025/08/12/KMPAlgorithm/">http://example.com/2025/08/12/KMPAlgorithm/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/" title="Visual Studio用vcpkg安装pthread"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">Visual Studio用vcpkg安装pthread</div></div><div class="info-2"><div class="info-item-1">想在vs里用pthread实现多线程，导入头文件后，提示我用vckpg安装pthread。 现阶段网上大多教程都是用nuget安装pthread，但是我nuget里找不到pthread的安装包。 没办法，只能按vs提示，用vcpkg安装。vcpkg官网安装步骤有4步，每一步都有坑。 vcpkg官网链接 Step 1: Clone the vcpkg repo git clone https://github.com/Microsoft/vcpkg.git Make sure you are in the directory you want the tool installed to before doing this. Step 2: Run the bootstrap script to build vcpkg .\vcpkg\bootstrap-vcpkg.bat Install libraries for your projectvcpkg install [packages to install] Using vcpkg with MSBuild &#x2F; Visu...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zaki</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zhuzq2020"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8KMP"><span class="toc-number">1.</span> <span class="toc-text">为什么使用KMP</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#KMP%E4%BC%98%E5%8A%BF"><span class="toc-number">2.</span> <span class="toc-text">KMP优势</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8KMP"><span class="toc-number">3.</span> <span class="toc-text">如何使用KMP</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90next%E6%95%B0%E7%BB%84"><span class="toc-number">3.1.</span> <span class="toc-text">生成next数组</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%89%8D%E5%90%8E%E7%BC%80"><span class="toc-number">3.1.1.</span> <span class="toc-text">什么是前后缀</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90next%E6%95%B0%E7%BB%84%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B"><span class="toc-number">3.1.2.</span> <span class="toc-text">生成next数组代码如下</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KMP%E4%BD%BF%E7%94%A8"><span class="toc-number">3.2.</span> <span class="toc-text">KMP使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#KMP%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81"><span class="toc-number">3.2.1.</span> <span class="toc-text">KMP实现代码</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="toc-number">4.</span> <span class="toc-text">测试用例</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/" title="Visual Studio用vcpkg安装pthread">Visual Studio用vcpkg安装pthread</a><time datetime="2025-08-11T16:00:00.000Z" title="Created 2025-08-12 00:00:00">2025-08-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/12/KMPAlgorithm/" title="KMP算法详解">KMP算法详解</a><time datetime="2025-08-11T16:00:00.000Z" title="Created 2025-08-12 00:00:00">2025-08-12</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By zaki</span><span class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

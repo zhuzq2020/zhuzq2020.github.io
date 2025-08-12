@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Visual Studio用vcpkg安装pthread | Blog</title><meta name="author" content="zaki"><meta name="copyright" content="zaki"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="想在vs里用pthread实现多线程，导入头文件后，提示我用vckpg安装pthread。 现阶段网上大多教程都是用nuget安装pthread，但是我nuget里找不到pthread的安装包。 没办法，只能按vs提示，用vcpkg安装。vcpkg官网安装步骤有4步，每一步都有坑。 vcpkg官网链接 Step 1: Clone the vcpkg repo git clone https:&#x2F;&#x2F;g">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Visual Studio用vcpkg安装pthread">
+<meta property="og:url" content="http://example.com/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="想在vs里用pthread实现多线程，导入头文件后，提示我用vckpg安装pthread。 现阶段网上大多教程都是用nuget安装pthread，但是我nuget里找不到pthread的安装包。 没办法，只能按vs提示，用vcpkg安装。vcpkg官网安装步骤有4步，每一步都有坑。 vcpkg官网链接 Step 1: Clone the vcpkg repo git clone https:&#x2F;&#x2F;g">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/img/butterfly-icon.jpg">
+<meta property="article:published_time" content="2025-08-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-12T07:07:17.907Z">
+<meta property="article:author" content="zaki">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/butterfly-icon.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Visual Studio用vcpkg安装pthread",
+  "url": "http://example.com/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/",
+  "image": "http://example.com/img/butterfly-icon.jpg",
+  "datePublished": "2025-08-11T16:00:00.000Z",
+  "dateModified": "2025-08-12T07:07:17.907Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zaki",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Visual Studio用vcpkg安装pthread',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">Visual Studio用vcpkg安装pthread</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  Back to Home</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">Visual Studio用vcpkg安装pthread</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-08-11T16:00:00.000Z" title="Created 2025-08-12 00:00:00">2025-08-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-08-12T07:07:17.907Z" title="Updated 2025-08-12 15:07:17">2025-08-12</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>想在vs里用pthread实现多线程，导入头文件后，提示我用vckpg安装pthread。</p>
+<p>现阶段网上大多教程都是用nuget安装pthread，但是我nuget里找不到pthread的安装包。</p>
+<p>没办法，只能按vs提示，用vcpkg安装。vcpkg官网安装步骤有4步，每一步都有坑。</p>
+<p>vcpkg官网链接</p>
+<p>Step 1: Clone the vcpkg repo</p>
+<p>git clone <a target="_blank" rel="noopener" href="https://github.com/Microsoft/vcpkg.git">https://github.com/Microsoft/vcpkg.git</a></p>
+<p>Make sure you are in the directory you want the tool installed to before doing this.</p>
+<p>Step 2: Run the bootstrap script to build vcpkg</p>
+<p>.\vcpkg\bootstrap-vcpkg.bat</p>
+<p>Install libraries for your project<br>vcpkg install [packages to install]</p>
+<p>Using vcpkg with MSBuild &#x2F; Visual Studio (may require elevation)<br>vcpkg integrate install</p>
+<h2 id="第一步，按照官网提示的git指令，项目下载不了，下载速度很慢，下载百分之1就停止下载了。开了vpn也没用。解决方法：换个下载指令，git-clone-git-github-com-microsoft-vcpkg-git"><a href="#第一步，按照官网提示的git指令，项目下载不了，下载速度很慢，下载百分之1就停止下载了。开了vpn也没用。解决方法：换个下载指令，git-clone-git-github-com-microsoft-vcpkg-git" class="headerlink" title="第一步，按照官网提示的git指令，项目下载不了，下载速度很慢，下载百分之1就停止下载了。开了vpn也没用。解决方法：换个下载指令，git clone git@github.com:microsoft&#x2F;vcpkg.git"></a>第一步，按照官网提示的git指令，项目下载不了，下载速度很慢，下载百分之1就停止下载了。开了vpn也没用。解决方法：换个下载指令，git clone <a href="mailto:&#103;&#105;&#x74;&#x40;&#103;&#x69;&#x74;&#104;&#x75;&#x62;&#46;&#99;&#111;&#x6d;">git@github.com</a>:microsoft&#x2F;vcpkg.git</h2><h2 id="第二步，bat文件执行不了。解决方法：开vpn。"><a href="#第二步，bat文件执行不了。解决方法：开vpn。" class="headerlink" title="第二步，bat文件执行不了。解决方法：开vpn。"></a>第二步，bat文件执行不了。解决方法：开vpn。</h2><p>要注意，修改文件地址的斜杠，不然找不到bat文件。</p>
+<h2 id="第三步，vcpkg命令报错。解决方法：切换到终端界面执行。"><a href="#第三步，vcpkg命令报错。解决方法：切换到终端界面执行。" class="headerlink" title="第三步，vcpkg命令报错。解决方法：切换到终端界面执行。"></a>第三步，vcpkg命令报错。解决方法：切换到终端界面执行。</h2><h2 id="第四步，如果不执行的话，vs还是识别不了pthread-h。"><a href="#第四步，如果不执行的话，vs还是识别不了pthread-h。" class="headerlink" title="第四步，如果不执行的话，vs还是识别不了pthread.h。"></a>第四步，如果不执行的话，vs还是识别不了pthread.h。</h2></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">zaki</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/">http://example.com/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/08/12/KMPAlgorithm/" title="KMP算法详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">KMP算法详解</div></div><div class="info-2"><div class="info-item-1">为什么使用KMP解决问题：在主串“SSSSSSSSSSSSSSSSSSSSSSSA”中查找”SSB”，比较到最后一个才知道不匹配，然后回溯，效率低。 KMP优势分析子串n本身的特点（生成next数组），在主串m查找子串的时候，不需要重头遍历，从有重复部分的地方开始遍历即可。时间复杂度：O(m+n) 暴力查找遍历的时间复杂度：O(mn) 如何使用KMP生成next数组生成next数组最重要的就是：前缀和后缀相同的字符个数（找到相同个数的字符串，后面使用KMP回溯时，就可以快速回溯到特征字符串，避免每次都回溯到第一个字符） 什么是前后缀将字符串从中间一分为二，前面为前缀，后面为后缀。举例：“ABCDABC”前缀为“ABC”，后缀也为“ABC”“ABCD”前缀为“AB”，后缀为“CD”next数组就是存放的到j位置，前后缀相同字符的个数。举例：“ABCDABC”next[] &#x3D; {0，0，0，0，1，2，3}其中取next[5]为例截取字符：ABCDAB，其中前缀“ABC”和后缀“DAB”有相同字符“AB”，长度为2，即next[5] &#x3D; 2。 生成next数组代码...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zaki</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zhuzq2020"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%8C%E6%8C%89%E7%85%A7%E5%AE%98%E7%BD%91%E6%8F%90%E7%A4%BA%E7%9A%84git%E6%8C%87%E4%BB%A4%EF%BC%8C%E9%A1%B9%E7%9B%AE%E4%B8%8B%E8%BD%BD%E4%B8%8D%E4%BA%86%EF%BC%8C%E4%B8%8B%E8%BD%BD%E9%80%9F%E5%BA%A6%E5%BE%88%E6%85%A2%EF%BC%8C%E4%B8%8B%E8%BD%BD%E7%99%BE%E5%88%86%E4%B9%8B1%E5%B0%B1%E5%81%9C%E6%AD%A2%E4%B8%8B%E8%BD%BD%E4%BA%86%E3%80%82%E5%BC%80%E4%BA%86vpn%E4%B9%9F%E6%B2%A1%E7%94%A8%E3%80%82%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%9A%E6%8D%A2%E4%B8%AA%E4%B8%8B%E8%BD%BD%E6%8C%87%E4%BB%A4%EF%BC%8Cgit-clone-git-github-com-microsoft-vcpkg-git"><span class="toc-number">1.</span> <span class="toc-text">第一步，按照官网提示的git指令，项目下载不了，下载速度很慢，下载百分之1就停止下载了。开了vpn也没用。解决方法：换个下载指令，git clone git@github.com:microsoft&#x2F;vcpkg.git</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%8Cbat%E6%96%87%E4%BB%B6%E6%89%A7%E8%A1%8C%E4%B8%8D%E4%BA%86%E3%80%82%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%9A%E5%BC%80vpn%E3%80%82"><span class="toc-number">2.</span> <span class="toc-text">第二步，bat文件执行不了。解决方法：开vpn。</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%8Cvcpkg%E5%91%BD%E4%BB%A4%E6%8A%A5%E9%94%99%E3%80%82%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%9A%E5%88%87%E6%8D%A2%E5%88%B0%E7%BB%88%E7%AB%AF%E7%95%8C%E9%9D%A2%E6%89%A7%E8%A1%8C%E3%80%82"><span class="toc-number">3.</span> <span class="toc-text">第三步，vcpkg命令报错。解决方法：切换到终端界面执行。</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%8C%E5%A6%82%E6%9E%9C%E4%B8%8D%E6%89%A7%E8%A1%8C%E7%9A%84%E8%AF%9D%EF%BC%8Cvs%E8%BF%98%E6%98%AF%E8%AF%86%E5%88%AB%E4%B8%8D%E4%BA%86pthread-h%E3%80%82"><span class="toc-number">4.</span> <span class="toc-text">第四步，如果不执行的话，vs还是识别不了pthread.h。</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/" title="Visual Studio用vcpkg安装pthread">Visual Studio用vcpkg安装pthread</a><time datetime="2025-08-11T16:00:00.000Z" title="Created 2025-08-12 00:00:00">2025-08-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/12/KMPAlgorithm/" title="KMP算法详解">KMP算法详解</a><time datetime="2025-08-11T16:00:00.000Z" title="Created 2025-08-12 00:00:00">2025-08-12</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By zaki</span><span class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
