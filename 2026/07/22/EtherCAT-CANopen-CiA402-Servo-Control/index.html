@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>EtherCAT 与 CANopen/CiA 402 伺服控制入门：从 CoE、SDO/PDO 到状态机 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">文章</a>
+      <a class="" href="/archives/">归档</a>
+    </nav>
+    <div class="header-actions">
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <article class="article-shell">
+  <header class="article-header">
+    <a class="back-link" href="/">← 返回文章列表</a>
+    <div class="article-kicker">
+      <span>TECH NOTE</span>
+      <time datetime="2026-07-21T16:00:00.000Z">2026.07.22</time>
+    </div>
+    <h1>EtherCAT 与 CANopen/CiA 402 伺服控制入门：从 CoE、SDO/PDO 到状态机</h1>
+    
+    <div class="article-stats">
+      <span>约 9 分钟阅读</span>
+      <span>4338 字</span>
+      
+        <span># EtherCAT</span><span># CANopen</span><span># CiA 402</span><span># 伺服控制</span>
+      
+    </div>
+  </header>
+  <div class="article-grid">
+    <aside class="article-rail" aria-hidden="true">
+      <span>READING</span>
+      <i></i>
+      <b>Z / 26</b>
+    </aside>
+    <div class="prose"><p>在 EtherCAT 伺服系统中，经常会同时遇到 EtherCAT、CoE、CANopen、CiA 402、SDO、PDO、SoE 和 IgH 等名词。它们并不处于同一层：EtherCAT 负责实时以太网通信，CoE 把 CANopen 的通信机制和对象字典带到 EtherCAT 上，CiA 402 则规定驱动器应该如何被控制。</p>
+<p>本文从协议分层出发，梳理 EtherCAT 伺服控制的完整链路，并说明驱动器从上电到进入运行状态的基本过程。</p>
+<h2 id="一、先看整体关系"><a href="#一、先看整体关系" class="headerlink" title="一、先看整体关系"></a>一、先看整体关系</h2><p>一条典型的 EtherCAT 伺服控制链路可以概括为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">应用程序 / 运动控制算法</span><br><span class="line">        ↓</span><br><span class="line">CiA 402 驱动器与运动控制设备规范</span><br><span class="line">        ↓</span><br><span class="line">CoE（CANopen over EtherCAT）</span><br><span class="line">   ├── SDO：配置参数、访问对象字典</span><br><span class="line">   └── PDO：周期性交换实时过程数据</span><br><span class="line">        ↓</span><br><span class="line">EtherCAT 主站（例如 IgH EtherCAT Master）</span><br><span class="line">        ↓</span><br><span class="line">以太网控制器 / PHY</span><br><span class="line">        ↓</span><br><span class="line">EtherCAT 从站（伺服驱动器、I/O 模块等）</span><br></pre></td></tr></table></figure>
+
+<p>需要注意：CoE 并不是把完整的 CAN 报文直接封装进 Ethernet。它复用了 CANopen 的对象字典、SDO、PDO 和设备规范，但底层数据传输由 EtherCAT 完成，因此不再受经典 CAN 单帧 8 字节以及 CAN 总线带宽的限制。</p>
+<h2 id="二、EtherCAT、CANopen-与-CiA-规范"><a href="#二、EtherCAT、CANopen-与-CiA-规范" class="headerlink" title="二、EtherCAT、CANopen 与 CiA 规范"></a>二、EtherCAT、CANopen 与 CiA 规范</h2><h3 id="1-EtherCAT"><a href="#1-EtherCAT" class="headerlink" title="1. EtherCAT"></a>1. EtherCAT</h3><p>EtherCAT 是面向工业实时控制的以太网技术。主站发送的帧经过各个从站时，从站会在帧通过过程中读取属于自己的输出数据，同时写入输入数据。这种“边经过、边处理”的机制减少了逐站收发完整报文带来的延迟。</p>
+<p>IgH EtherCAT Master 是 Linux 上常见的开源 EtherCAT 主站实现。应用程序通常通过主站 API 完成从站扫描、PDO 配置、Domain 注册、周期数据交换和状态监控。</p>
+<h3 id="2-CANopen-与对象字典"><a href="#2-CANopen-与对象字典" class="headerlink" title="2. CANopen 与对象字典"></a>2. CANopen 与对象字典</h3><p>CANopen 建立在对象字典（Object Dictionary，OD）之上。设备的配置参数、控制命令和运行状态都以“索引 + 子索引”的方式组织。例如 CiA 402 驱动器中最常见的对象包括：</p>
+<table>
+<thead>
+<tr>
+<th>索引</th>
+<th>对象</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0x6040</code></td>
+<td>Controlword</td>
+<td>控制驱动器状态切换</td>
+</tr>
+<tr>
+<td><code>0x6041</code></td>
+<td>Statusword</td>
+<td>反馈驱动器当前状态</td>
+</tr>
+<tr>
+<td><code>0x6060</code></td>
+<td>Modes of operation</td>
+<td>设置运行模式</td>
+</tr>
+<tr>
+<td><code>0x6061</code></td>
+<td>Modes of operation display</td>
+<td>反馈当前运行模式</td>
+</tr>
+<tr>
+<td><code>0x607A</code></td>
+<td>Target position</td>
+<td>目标位置</td>
+</tr>
+<tr>
+<td><code>0x60FF</code></td>
+<td>Target velocity</td>
+<td>目标速度</td>
+</tr>
+<tr>
+<td><code>0x6071</code></td>
+<td>Target torque</td>
+<td>目标转矩</td>
+</tr>
+</tbody></table>
+<p>CAN in Automation（CiA）制定了多种 CANopen 规范：</p>
+<ul>
+<li><strong>CiA 301</strong>：CANopen 应用层和通信规范，是 CANopen 的基础。</li>
+<li><strong>CiA 401</strong>：通用 I&#x2F;O 模块设备规范。</li>
+<li><strong>CiA 402</strong>：驱动器与运动控制设备规范，定义状态机、运行模式及相关对象字典条目。</li>
+</ul>
+<h3 id="3-CoE"><a href="#3-CoE" class="headerlink" title="3. CoE"></a>3. CoE</h3><p>CoE（CANopen over EtherCAT）使 EtherCAT 设备能够继续使用成熟的 CANopen 上层模型。对于运动控制系统，常见组合是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EtherCAT + CoE + CiA 402</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，底层总线换成了 EtherCAT，而驱动器的对象字典、SDO&#x2F;PDO 访问方式以及 CiA 402 状态机仍然保留。</p>
+<h2 id="三、SDO-与-PDO：配置通道和实时通道"><a href="#三、SDO-与-PDO：配置通道和实时通道" class="headerlink" title="三、SDO 与 PDO：配置通道和实时通道"></a>三、SDO 与 PDO：配置通道和实时通道</h2><p>SDO 和 PDO 的用途不同，可以简单理解为：<strong>SDO 用来配置，PDO 用来跑周期控制。</strong></p>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>SDO</th>
+<th>PDO</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全称</td>
+<td>Service Data Object</td>
+<td>Process Data Object</td>
+</tr>
+<tr>
+<td>通信模型</td>
+<td>客户端—服务器，请求—响应</td>
+<td>生产者—消费者</td>
+</tr>
+<tr>
+<td>确认机制</td>
+<td>有响应，可检测超时或错误</td>
+<td>通常无逐帧确认</td>
+</tr>
+<tr>
+<td>实时性</td>
+<td>较低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>数据传输</td>
+<td>支持快速、分段或块传输</td>
+<td>传输预先映射的过程数据</td>
+</tr>
+<tr>
+<td>典型用途</td>
+<td>参数读写、PDO 映射、初始化配置</td>
+<td>控制字、目标值、状态字、实际值</td>
+</tr>
+</tbody></table>
+<h3 id="1-SDO：访问对象字典"><a href="#1-SDO：访问对象字典" class="headerlink" title="1. SDO：访问对象字典"></a>1. SDO：访问对象字典</h3><p>SDO 适合在初始化或维护阶段使用，例如：</p>
+<ul>
+<li>设置驱动器运行模式；</li>
+<li>配置 PDO 映射关系；</li>
+<li>设置限位、加速度和控制增益；</li>
+<li>读取设备信息和故障码；</li>
+<li>下发不要求固定周期完成的参数。</li>
+</ul>
+<p>SDO 采用请求—响应方式，主站需要等待从站应答。一次访问失败时，还可以根据超时或 Abort Code 进行诊断。大数据可使用分段传输或块传输，但它不适合放在高频控制环中反复调用。</p>
+<h3 id="2-PDO：交换过程数据"><a href="#2-PDO：交换过程数据" class="headerlink" title="2. PDO：交换过程数据"></a>2. PDO：交换过程数据</h3><p>PDO 用于周期性的实时数据交换。主站会在启动前确定 PDO 映射，把对象字典中的条目放入过程数据区。例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RxPDO（主站 → 驱动器）：控制字、运行模式、目标位置</span><br><span class="line">TxPDO（驱动器 → 主站）：状态字、实际位置、实际速度</span><br></pre></td></tr></table></figure>
+
+<p>这里的 Rx&#x2F;Tx 是站在从站角度命名的：从站接收的是 RxPDO，从站发送的是 TxPDO。</p>
+<p>在 IgH 主站中，应用程序会把 PDO 条目注册到 Domain，并取得每个条目在过程数据内存中的偏移量。实时线程按固定周期读写这些偏移位置，主站再统一收发 EtherCAT 帧。所谓“实时内核与线程绑定”，通常还包括使用实时调度策略、锁定内存、设置 CPU 亲和性并减少调度抖动，而不只是完成 PDO 映射。</p>
+<h2 id="四、EtherCAT-从站状态与-CiA-402-状态机"><a href="#四、EtherCAT-从站状态与-CiA-402-状态机" class="headerlink" title="四、EtherCAT 从站状态与 CiA 402 状态机"></a>四、EtherCAT 从站状态与 CiA 402 状态机</h2><p>实际调试时有两套状态机需要区分：</p>
+<h3 id="1-EtherCAT-状态机"><a href="#1-EtherCAT-状态机" class="headerlink" title="1. EtherCAT 状态机"></a>1. EtherCAT 状态机</h3><p>EtherCAT 从站一般依次经历：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INIT → PRE-OP → SAFE-OP → OP</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>INIT</strong>：初始化通信控制器，过程数据通信尚未建立。</li>
+<li><strong>PRE-OP</strong>：邮箱通信可用，可以使用 SDO 完成参数和 PDO 配置。</li>
+<li><strong>SAFE-OP</strong>：输入过程数据已经可用，输出保持在安全状态。</li>
+<li><strong>OP</strong>：输入、输出过程数据均正常交换。</li>
+</ul>
+<p>从站进入 EtherCAT 的 OP 状态，只代表总线过程数据通信已经就绪，并不等于伺服电机已经使能。</p>
+<h3 id="2-CiA-402-驱动器状态机"><a href="#2-CiA-402-驱动器状态机" class="headerlink" title="2. CiA 402 驱动器状态机"></a>2. CiA 402 驱动器状态机</h3><p>在 EtherCAT OP 之后，还需要通过 <code>0x6040</code> 控制字推动 CiA 402 状态机。典型使能流程如下：</p>
+<table>
+<thead>
+<tr>
+<th>目标状态</th>
+<th align="right">常用控制字</th>
+<th align="right">Statusword 典型判定值（掩码后）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Switch on disabled</td>
+<td align="right">—</td>
+<td align="right"><code>0x0040</code></td>
+</tr>
+<tr>
+<td>Ready to switch on</td>
+<td align="right"><code>0x0006</code>（Shutdown）</td>
+<td align="right"><code>0x0021</code></td>
+</tr>
+<tr>
+<td>Switched on</td>
+<td align="right"><code>0x0007</code>（Switch on）</td>
+<td align="right"><code>0x0023</code></td>
+</tr>
+<tr>
+<td>Operation enabled</td>
+<td align="right"><code>0x000F</code>（Enable operation）</td>
+<td align="right"><code>0x0027</code></td>
+</tr>
+</tbody></table>
+<p>状态字中还包含电压、警告、目标到达以及厂商自定义等其他位，所以实际读数可能是 <code>0x0231</code>、<code>0x0233</code>、<code>0x0237</code> 等。程序不应该只比较整个 16 位数值，而应根据 CiA 402 定义使用掩码判断关键状态位。</p>
+<p>一个简化的启动控制逻辑如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">开始</span><br><span class="line">  ↓</span><br><span class="line">完成 EtherCAT 和 PDO 初始化</span><br><span class="line">  ↓</span><br><span class="line">检查故障 ── 有故障 → 发送 Fault reset（控制字 bit 7）</span><br><span class="line">  ↓ 无故障</span><br><span class="line">发送 0x0006，等待 Ready to switch on</span><br><span class="line">  ↓</span><br><span class="line">发送 0x0007，等待 Switched on</span><br><span class="line">  ↓</span><br><span class="line">发送 0x000F，等待 Operation enabled</span><br><span class="line">  ↓</span><br><span class="line">按控制周期更新目标值并检查状态</span><br></pre></td></tr></table></figure>
+
+<p>工程中还必须处理 Quick stop、Disable voltage、Fault reaction active 和 Fault 等分支。发生故障时，应先读取错误码并消除故障原因，再执行故障复位，不能无条件反复复位。</p>
+<h2 id="五、位置、速度和转矩控制模式"><a href="#五、位置、速度和转矩控制模式" class="headerlink" title="五、位置、速度和转矩控制模式"></a>五、位置、速度和转矩控制模式</h2><p>CiA 402 常见运行模式可以分为两类。</p>
+<h3 id="1-Profile-模式"><a href="#1-Profile-模式" class="headerlink" title="1. Profile 模式"></a>1. Profile 模式</h3><ul>
+<li><strong>PP（Profile Position）</strong>：轮廓位置模式；</li>
+<li><strong>PV（Profile Velocity）</strong>：轮廓速度模式；</li>
+<li><strong>PT（Profile Torque）</strong>：轮廓转矩模式，具体支持情况取决于驱动器。</li>
+</ul>
+<p>在 Profile 模式中，主站给出目标值及速度、加速度等参数，轨迹主要由驱动器内部规划。它对主站控制周期的严格程度相对较低。</p>
+<h3 id="2-Cyclic-Synchronous-模式"><a href="#2-Cyclic-Synchronous-模式" class="headerlink" title="2. Cyclic Synchronous 模式"></a>2. Cyclic Synchronous 模式</h3><ul>
+<li><strong>CSP（Cyclic Synchronous Position）</strong>：周期同步位置模式；</li>
+<li><strong>CSV（Cyclic Synchronous Velocity）</strong>：周期同步速度模式；</li>
+<li><strong>CST（Cyclic Synchronous Torque）</strong>：周期同步转矩模式。</li>
+</ul>
+<p>在同步模式下，主站每个控制周期都通过 PDO 更新目标值，轨迹规划通常由主站完成。为了保证多个轴在同一时间基准下运行，系统常使用 EtherCAT Distributed Clocks（DC）进行时钟同步。</p>
+<p>典型周期任务包括：</p>
+<ol>
+<li>接收 EtherCAT 帧并处理 Domain；</li>
+<li>读取状态字和实际位置等反馈；</li>
+<li>运行轨迹规划或控制算法；</li>
+<li>写入控制字和新的目标值；</li>
+<li>对齐 DC 时钟并发送下一周期数据。</li>
+</ol>
+<p>控制周期越短，对实时线程、网卡、CPU 调度和时钟同步的要求越高。周期本身并非越短越好，应结合驱动器能力和控制目标选择。</p>
+<h2 id="六、SoE、FoE-与-EoE"><a href="#六、SoE、FoE-与-EoE" class="headerlink" title="六、SoE、FoE 与 EoE"></a>六、SoE、FoE 与 EoE</h2><p>EtherCAT 除了 CoE，还定义了多种邮箱协议：</p>
+<ul>
+<li><strong>SoE（Servo over EtherCAT）</strong>：面向伺服驱动的实时参数与控制协议，基于 SERCOS 的驱动器配置模型。它与“CoE + CiA 402”是两种不同的应用层方案，具体使用哪一种取决于驱动器支持。</li>
+<li><strong>FoE（File access over EtherCAT）</strong>：用于在 EtherCAT 网络中传输文件，常见于固件或配置文件下载。</li>
+<li><strong>EoE（Ethernet over EtherCAT）</strong>：在 EtherCAT 邮箱中传输普通以太网帧，使设备能够承载 IP 等以太网通信。</li>
+</ul>
+<p>因此，看到一台 EtherCAT 伺服驱动器时，首先要从 ESI 文件和厂商手册确认它支持 CoE、SoE 还是其他协议，不能仅凭“EtherCAT 伺服”就假定其一定使用 CiA 402。</p>
+<h2 id="七、一次完整的工程配置流程"><a href="#七、一次完整的工程配置流程" class="headerlink" title="七、一次完整的工程配置流程"></a>七、一次完整的工程配置流程</h2><p>把上面的概念串起来，基于 IgH 与 CoE&#x2F;CiA 402 的系统通常按以下顺序启动：</p>
+<ol>
+<li>初始化 EtherCAT 主站并申请 Master；</li>
+<li>扫描从站，核对 Vendor ID、Product Code 和拓扑；</li>
+<li>根据 ESI&#x2F;手册配置 Sync Manager 与 PDO 映射；</li>
+<li>将 PDO 条目注册到 Domain，记录过程数据偏移量；</li>
+<li>通过 SDO 写入必要的初始化参数；</li>
+<li>激活主站并启动实时周期线程；</li>
+<li>等待 EtherCAT 从站进入 OP；</li>
+<li>通过控制字推进 CiA 402 状态机，直到 Operation enabled；</li>
+<li>在每个周期中通过 PDO 下发目标值、读取反馈；</li>
+<li>持续监测工作计数器、链路状态、状态字和故障码，并在停机时执行安全的状态切换。</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>EtherCAT 伺服控制可以用三层关系来记忆：</p>
+<ul>
+<li><strong>EtherCAT</strong> 解决高速、确定性的总线传输；</li>
+<li><strong>CoE 的 SDO&#x2F;PDO 与对象字典</strong> 解决参数配置和过程数据交换；</li>
+<li><strong>CiA 402</strong> 解决驱动器如何使能、如何运行以及如何处理故障。</li>
+</ul>
+<p>调试时也应按层排查：先确认 EtherCAT 链路与从站状态，再确认 PDO 映射和工作计数器，最后检查 CiA 402 状态机、运行模式与目标值。把总线状态和驱动器状态分开观察，通常能更快定位问题。</p>
+</div>
+  </div>
+  <nav class="post-navigation" aria-label="文章导航">
+    <span></span>
+    
+      <a class="post-navigation__next" href="/2025/08/12/KMPAlgorithm/"><small>下一篇</small><span>KMP算法详解 →</span></a>
+    
+  </nav>
+</article>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>
