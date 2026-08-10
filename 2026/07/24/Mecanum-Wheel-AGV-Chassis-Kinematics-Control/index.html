@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">文章</a>
+      <a class="" href="/archives/">归档</a>
+    </nav>
+    <div class="header-actions">
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <article class="article-shell">
+  <header class="article-header">
+    <a class="back-link" href="/">← 返回文章列表</a>
+    <div class="article-kicker">
+      <span>TECH NOTE</span>
+      <time datetime="2026-07-23T16:00:00.000Z">2026.07.24</time>
+    </div>
+    <h1>麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记</h1>
+    
+    <div class="article-stats">
+      <span>约 3 分钟阅读</span>
+      <span>1069 字</span>
+      
+        <span># 机器人</span><span># AGV</span><span># 麦克纳姆轮</span><span># 运动控制</span><span># EKF</span>
+      
+    </div>
+  </header>
+  <div class="article-grid">
+    <aside class="article-rail" aria-hidden="true">
+      <span>READING</span>
+      <i></i>
+      <b>Z / 26</b>
+    </aside>
+    <div class="prose"><p>最近整理了一些关于麦克纳姆轮全向底盘运动学解算、整车控制器架构，以及底盘状态估计的笔记，记录下来备忘。</p>
+<h2 id="一、运动学公式与控制框架"><a href="#一、运动学公式与控制框架" class="headerlink" title="一、运动学公式与控制框架"></a>一、运动学公式与控制框架</h2><p>麦克纳姆轮底盘的核心问题是：<strong>给定底盘的期望速度 <code>Vx</code>、<code>Vy</code>、<code>Wz</code>，计算四个轮子各自的目标角速度</strong>。</p>
+<p>四轮的目标角速度可以写成如下矩阵形式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">| Wfl |       | 1  -1  -(L+W) |   | Vx |</span><br><span class="line">| Wfr |   1   | 1   1   (L+W) |   |    |</span><br><span class="line">| Wrl | = --- | 1   1  -(L+W) | * | Vy |</span><br><span class="line">| Wrr |   r   | 1  -1   (L+W) |   | Wz |</span><br></pre></td></tr></table></figure>
+
+<p>各符号含义：</p>
+<ul>
+<li><code>r</code>：轮子半径</li>
+<li><code>L</code>：底盘中心到前后轮的距离</li>
+<li><code>W</code>：底盘中心到左右轮的距离</li>
+<li><code>Vx</code>：底盘前后方向速度</li>
+<li><code>Vy</code>：底盘左右横移速度</li>
+<li><code>Wz</code>：绕底盘垂直方向（yaw）的旋转角速度，正方向为逆时针</li>
+</ul>
+<p>这套公式本质上是把底盘坐标系下的三自由度运动（前进、横移、自转）分解到四个麦克纳姆轮各自的转速上，是全向底盘运动解算的基础。</p>
+<h2 id="二、麦克纳姆轮整车控制器"><a href="#二、麦克纳姆轮整车控制器" class="headerlink" title="二、麦克纳姆轮整车控制器"></a>二、麦克纳姆轮整车控制器</h2><p>麦克纳姆轮是一种特殊的全向轮，轮子外圈带有若干倾斜安装的小滚子，正是这些滚子让底盘具备了横移和原地旋转的能力。</p>
+<p>一个完整的整车控制器（Vehicle Controller）通常包含以下几个部分：</p>
+<ol>
+<li><strong>运动解算</strong>：把车辆整体的运动指令（<code>Vx</code>、<code>Vy</code>、<code>Wz</code>）转换成四个轮子各自的速度指令，也就是上一节的矩阵运算。</li>
+<li><strong>电机控制协调</strong>：整车控制器通常不会直接驱动大功率电机，而是向电机驱动器发送控制指令，由驱动器完成实际的电机驱动。</li>
+<li><strong>姿态与速度闭环控制</strong>：在一些高精度应用场景中，控制器还会结合传感器数据进行闭环控制，而不是单纯的开环速度下发。</li>
+<li><strong>底盘运动模式控制</strong>：支持手柄遥控、自动导航等不同的运动模式切换。</li>
+<li><strong>安全保护</strong>：包括过压&#x2F;欠压保护、软启动、软停止等安全机制，保证底盘运行的可靠性。</li>
+</ol>
+<p>顺带记一下概念：<strong>AGV（Automated Guided Vehicle）</strong>，即自动导引车，是这类底盘最典型的应用形式。</p>
+<h2 id="三、底盘状态估计"><a href="#三、底盘状态估计" class="headerlink" title="三、底盘状态估计"></a>三、底盘状态估计</h2><p>底盘的状态估计一般通过 <strong>EKF（扩展卡尔曼滤波，Extended Kalman Filter）</strong> 来完成，用于融合多种传感器数据，估计机器人的状态（位置、姿态、速度等），常见的输入传感器包括编码器、IMU 等。</p>
+<p>在定位信息上，可以分成两类：</p>
+<ul>
+<li><strong>相对位置</strong>：由编码器、IMU 等递推得到，误差会随时间累积（漂移）。</li>
+<li><strong>绝对位置</strong>：由激光 SLAM、视觉、UWB 等外部定位手段得到，用于修正相对定位的累积误差。</li>
+</ul>
+<p>在仿真验证阶段，可以用 <strong>Gazebo</strong> 提供的真值（ground truth）作为基准，用来评估 EKF 融合定位结果的精度。</p>
+<hr>
+<p>以上是这部分学习笔记的整理，后续如果深入到具体的 EKF 状态方程和麦克纳姆轮控制器代码实现，再单独展开。</p>
+</div>
+  </div>
+  <nav class="post-navigation" aria-label="文章导航">
+    
+      <a href="/2026/08/10/Dual-Arm-End-Effector-Reachability/"><small>上一篇</small><span>← 双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图</span></a>
+    
+    
+      <a class="post-navigation__next" href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/"><small>下一篇</small><span>EtherCAT 与 CANopen/CiA 402 伺服控制入门：从 CoE、SDO/PDO 到状态机 →</span></a>
+    
+  </nav>
+</article>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>

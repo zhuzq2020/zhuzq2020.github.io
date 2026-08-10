@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/2026/08/10/Dual-Arm-End-Effector-Reachability/">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">文章</a>
+      <a class="" href="/archives/">归档</a>
+    </nav>
+    <div class="header-actions">
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <article class="article-shell">
+  <header class="article-header">
+    <a class="back-link" href="/">← 返回文章列表</a>
+    <div class="article-kicker">
+      <span>TECH NOTE</span>
+      <time datetime="2026-08-09T16:00:00.000Z">2026.08.10</time>
+    </div>
+    <h1>双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图</h1>
+    
+    <div class="article-stats">
+      <span>约 7 分钟阅读</span>
+      <span>3491 字</span>
+      
+        <span># 机器人</span><span># URDF</span><span># 可达空间</span><span># 静力学</span>
+      
+    </div>
+  </header>
+  <div class="article-grid">
+    <aside class="article-rail" aria-hidden="true">
+      <span>READING</span>
+      <i></i>
+      <b>Z / 26</b>
+    </aside>
+    <div class="prose"><p>机器人的末端在几何上能够到达某个位置，并不意味着它能带着负载稳定到达。关节限位决定了运动学可达空间，电机扭矩又会进一步裁剪这个空间。对于带重载双臂的移动机器人，腰部关节往往是这两类约束交汇的地方。</p>
+<p>本文基于修正质量参数后的 <code>bass-00-corrected</code> URDF，分析左右末端各挂载 10 kg 时的可达空间，并用 557 N·m 的腰部电机限制筛选可用姿态。内容包括两部分：一是 D6、D7 耦合姿态的静态力矩推导，二是 D5～D8 约束下的末端可达热力图。</p>
+<h2 id="一、模型、坐标系与计算假设"><a href="#一、模型、坐标系与计算假设" class="headerlink" title="一、模型、坐标系与计算假设"></a>一、模型、坐标系与计算假设</h2><p>计算采用以下条件：</p>
+<ul>
+<li>数据源为修正质量参数后的 <code>bass-00.urdf</code>；</li>
+<li>重力加速度 <code>g = 9.8 m/s²</code>；</li>
+<li>左、右末端分别挂载 10 kg；</li>
+<li>负载作用点取两侧末端 <code>Empty_Link17</code>、<code>Empty_Link24</code> 的质心位置；</li>
+<li>模型包含 D5～D8 附近附加电机的质量；</li>
+<li>腰部 D5～D8 的静态重力矩限制均按 557 N·m 筛选；</li>
+<li>只计算准静态重力矩，不计惯性、冲击、摩擦、线缆拖曳和传动效率。</li>
+</ul>
+<p>热力图中的坐标基于固定底盘的 <code>base_link0</code> 原点 <code>(0, 0, 0.067)</code>，不是地面或腰部原点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">+X：机器人前方</span><br><span class="line"> Y：机器人左右方向</span><br><span class="line"> Z：高度</span><br></pre></td></tr></table></figure>
+
+<p>图中的白色竖向虚线为 <code>X = 0</code>，右侧才是机器人前方。</p>
+<h2 id="二、静态重力矩如何计算"><a href="#二、静态重力矩如何计算" class="headerlink" title="二、静态重力矩如何计算"></a>二、静态重力矩如何计算</h2><p>对于转轴方向固定、重力沿竖直方向作用的关节，可以把下游每个构件和负载对关节的力矩累加。对本文的平面化推导，可将质量矩写为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">C = Σ(mᵢ · xᵢ)</span><br><span class="line">S = Σ(mᵢ · zᵢ)</span><br><span class="line">T(θ) = g · (C cosθ + S sinθ)</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>xᵢ</code>、<code>zᵢ</code> 是第 <code>i</code> 个质量相对于关节轴心的位置，<code>mᵢ</code> 是其质量。这个表达式也可以改写为一个带相位的余弦函数：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">T(θ) = g · √(C² + S²) · cos(θ - atan2(S, C))</span><br></pre></td></tr></table></figure>
+
+<p>这样不仅能计算某个姿态的静态重力矩，还能直接找出理论峰值及其对应角度。</p>
+<h3 id="D7-子树的质量矩"><a href="#D7-子树的质量矩" class="headerlink" title="D7 子树的质量矩"></a>D7 子树的质量矩</h3><p>在双臂水平向前、两侧各挂 10 kg 的参考姿态下，D7 下游子树汇总结果为：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th align="right">数值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>D7 子树总质量</td>
+<td align="right">98.5171 kg</td>
+</tr>
+<tr>
+<td><code>C = Σ(mᵢxᵢ)</code></td>
+<td align="right">22.5039 kg·m</td>
+</tr>
+<tr>
+<td><code>S = Σ(mᵢzᵢ)</code></td>
+<td align="right">53.4752 kg·m</td>
+</tr>
+<tr>
+<td><code>√(C²+S²)</code></td>
+<td align="right">58.0174 kg·m</td>
+</tr>
+</tbody></table>
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">T_D7(θ) = 9.8 · (22.5039 cosθ + 53.4752 sinθ)</span><br><span class="line">        = 568.5709 · cos(θ - 67.19°)  N·m</span><br></pre></td></tr></table></figure>
+
+<p>D7 子树的理论峰值重力矩为 568.57 N·m，已经略高于 557 N·m。如果 D7 电机本身也以 557 N·m 为限制，就需要单独检查其工作角度，不能只看 D6。</p>
+<h2 id="三、D6-与-D7-耦合时的连续可用边界"><a href="#三、D6-与-D7-耦合时的连续可用边界" class="headerlink" title="三、D6 与 D7 耦合时的连续可用边界"></a>三、D6 与 D7 耦合时的连续可用边界</h2><p>单关节计算容易忽略一个关键问题：D7 前倾会改变上半身相对 D6 的质心位置，D6 再转动时，两者的角度会共同影响 D6 力矩。</p>
+<p>设：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">β  = D7 预先前倾并保持的角度</span><br><span class="line">q6 = D6 随后带动整个上部链转过的角度</span><br></pre></td></tr></table></figure>
+
+<p>D7 前倾后，D6 所看到的质量矩可写为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C(β) = A + C7 cosβ + S7 sinβ</span><br><span class="line">S(β) = B - C7 sinβ + S7 cosβ</span><br></pre></td></tr></table></figure>
+
+<p>由 URDF 中各连杆质量、质心和关节轴心位置汇总得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">A  = -25.819452 kg·m</span><br><span class="line">B  = +25.820109 kg·m</span><br><span class="line">C7 = +22.503949 kg·m</span><br><span class="line">S7 = +53.475182 kg·m</span><br></pre></td></tr></table></figure>
+
+<p>D6 的关节范围是 <code>-0.78～+0.78 rad</code>，即约 <code>-44.69°～+44.69°</code>。如果“能够带动”的判据是 D6 必须从零位走完整个正向行程，那么最先发生超限的位置出现在 <code>q6 = +44.69°</code>。</p>
+<p>代入 D6 正向终点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">T_D6(0.78, β)</span><br><span class="line">= 9.8 · [-0.19665</span><br><span class="line">         + 22.50395 cos(0.78 + β)</span><br><span class="line">         + 53.47518 sin(0.78 + β)]</span><br></pre></td></tr></table></figure>
+
+<p>当 <code>β = 0°</code> 时，D6 在行程末端的静态力矩为 523.42 N·m，仍低于限制。令力矩等于 557 N·m，沿 D7 从零位逐渐前倾的方向求第一个交点，得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">β_临界 = 11.9187° = 0.20802 rad</span><br><span class="line">T_D6(44.6907°, 11.9187°) = 557.00 N·m</span><br></pre></td></tr></table></figure>
+
+<p>因此，在“D7 先前倾并保持、D6 再走完整正向行程”的工况中，D7 的最大连续可用前倾角约为 <strong>11.92°</strong>。</p>
+<p>同一方程在约 <code>33.05°</code> 还有第二个交点。这是因为质心越过最大力臂方向后，重力矩会再次下降。但从零位连续增加角度时，系统已经在 <code>11.92°</code> 首次进入超限区间，所以不能把第二个交点当作连续安全边界。</p>
+<p>不同工况的结论如下：</p>
+<table>
+<thead>
+<tr>
+<th>工况</th>
+<th align="right">557 N·m 理论边界</th>
+<th align="right">加入 URDF 限位后的最大角度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>只有 D7 前倾，D6 保持参考位</td>
+<td align="right">正向范围内未达到限制</td>
+<td align="right">89.38°（D7 限位）</td>
+</tr>
+<tr>
+<td>D7 保持零位，只有 D6 倾转</td>
+<td align="right">48.13°</td>
+<td align="right">44.69°（D6 限位）</td>
+</tr>
+<tr>
+<td>D7 先前倾，D6 再走完整正向行程</td>
+<td align="right">D7 首次在 11.92° 触及限制</td>
+<td align="right">11.92°（连续边界）</td>
+</tr>
+</tbody></table>
+<p>这说明“最大前倾角”必须和其他关节的位置、目标行程一起定义，脱离工况谈一个单独角度没有意义。</p>
+<h2 id="四、557-N·m-约束后的末端可达空间"><a href="#四、557-N·m-约束后的末端可达空间" class="headerlink" title="四、557 N·m 约束后的末端可达空间"></a>四、557 N·m 约束后的末端可达空间</h2><p>对关节空间进行采样并完成正向运动学后，再剔除 D5～D8 任一电机静态重力矩超过 557 N·m 的姿态，可以得到负载条件下的末端可达分布。</p>
+<p><img src="/images/dual-arm-reachability/dual_arm_reachability_heatmap.png" alt="双臂末端可达空间热力图"></p>
+<p>上排是左右末端的 X-Z 投影，下排是 X-Y 俯视投影。每个网格边长为 5 cm，颜色代表落入网格且通过力矩约束的姿态数量，并采用对数色标：</p>
+<ul>
+<li>黄色表示有很多不同关节姿态能够到达，冗余度高；</li>
+<li>绿色表示可行姿态数量中等；</li>
+<li>紫色表示只有少数姿态能够到达，接近可达边界；</li>
+<li>白色表示没有找到通过 557 N·m 约束的样本。</li>
+</ul>
+<p>这里的颜色是<strong>姿态密度</strong>，不是力矩大小。图中高度低于零的零散区域来自纯运动学采样，因为当前结果尚未加入地面和自碰撞过滤，不能将其视为真实可用工作区。</p>
+<h2 id="五、力矩约束到底裁掉了哪些位置"><a href="#五、力矩约束到底裁掉了哪些位置" class="headerlink" title="五、力矩约束到底裁掉了哪些位置"></a>五、力矩约束到底裁掉了哪些位置</h2><p>只看最终可达图无法区分“关节够不到”和“能到但腰部扛不住”。下面的热力图专门展示 557 N·m 约束造成的影响。</p>
+<p><img src="/images/dual-arm-reachability/torque_constraint_heatmap.png" alt="557 N·m 力矩约束对末端空间的影响"></p>
+<p>上排表示每个 X-Z 网格内的力矩通过率：</p>
+<ul>
+<li>绿色接近 100%，说明到达该位置的大部分姿态都满足限制；</li>
+<li>黄色约为 50%，说明位置可达，但必须选择合适的腰部姿态；</li>
+<li>红色接近 0%，说明运动学上虽然可达，但采样姿态几乎都超过限制；</li>
+<li>白色表示没有样本或样本不足。</li>
+</ul>
+<p>下排表示每个位置找到的最佳腰部力矩利用率：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">利用率 = min[ max(|τ_D5|, …, |τ_D8|) ] / 557 × 100%</span><br></pre></td></tr></table></figure>
+
+<p>先在一个末端位置的每个候选姿态中找出 D5～D8 的最大绝对力矩，再选择其中最小者。利用率低于 100% 表示至少存在一个满足限制的姿态；超过 100% 表示当前采样中没有找到力矩可行解。</p>
+<p>从结果看，高度约 1～2 m、靠近身体中部的区域余量较大；低位、远伸和可达空间外缘通常负担明显增大。对搬箱、取放等任务，这张图比单纯的几何包络更适合定义工作区。</p>
+<h2 id="六、四个腰部电机谁是瓶颈"><a href="#六、四个腰部电机谁是瓶颈" class="headerlink" title="六、四个腰部电机谁是瓶颈"></a>六、四个腰部电机谁是瓶颈</h2><p>把 D5～D8 分别统计，可以看出各电机承担重力矩的差异。</p>
+<p><img src="/images/dual-arm-reachability/waist_motor_torque_heatmap.png" alt="D5-D8 静态重力矩热力图"></p>
+<p>图中颜色表示末端落在相应 X-Z 网格时，各电机绝对静态重力矩的平均值。四张子图的色条范围不同，跨电机比较必须读取数值，不能只比较颜色。</p>
+<table>
+<thead>
+<tr>
+<th>电机</th>
+<th align="right">平均力矩（N·m）</th>
+<th align="right">P95（N·m）</th>
+<th align="right">最大值（N·m）</th>
+<th align="right">超过 557 N·m 的比例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>D5</td>
+<td align="right">432.8</td>
+<td align="right">834.0</td>
+<td align="right">1250.5</td>
+<td align="right">34.44%</td>
+</tr>
+<tr>
+<td>D6</td>
+<td align="right">504.2</td>
+<td align="right">890.4</td>
+<td align="right">1055.0</td>
+<td align="right">47.15%</td>
+</tr>
+<tr>
+<td>D7</td>
+<td align="right">318.7</td>
+<td align="right">568.1</td>
+<td align="right">705.1</td>
+<td align="right">6.34%</td>
+</tr>
+<tr>
+<td>D8</td>
+<td align="right">31.1</td>
+<td align="right">96.6</td>
+<td align="right">189.7</td>
+<td align="right">0%</td>
+</tr>
+</tbody></table>
+<p>可以得到四点结论：</p>
+<ol>
+<li><strong>D6 是最常成为瓶颈的电机</strong>，约 47.15% 的采样超过限制；</li>
+<li><strong>D5 的极端峰值最高</strong>，最大静态重力矩达到 1250.5 N·m；</li>
+<li>D7 主要在部分边缘姿态超限；</li>
+<li>D8 的静态重力矩整体很小，在本次采样中没有超过 557 N·m。</li>
+</ol>
+<h2 id="七、如何把结果用于任务规划"><a href="#七、如何把结果用于任务规划" class="headerlink" title="七、如何把结果用于任务规划"></a>七、如何把结果用于任务规划</h2><p>末端规划不应只执行“逆解成功即接受”，更合适的筛选顺序是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">目标位置</span><br><span class="line">  → 运动学可达性与关节限位</span><br><span class="line">  → 地面、自碰撞和环境碰撞</span><br><span class="line">  → D5～D8 静态重力矩</span><br><span class="line">  → 动态力矩与安全余量</span><br><span class="line">  → 轨迹连续性和控制可执行性</span><br></pre></td></tr></table></figure>
+
+<p>热力图可以作为规划器的先验代价：优先选择姿态密度高、最佳力矩利用率低的位置；接近边界的任务则应降低速度和加速度，或重新分配双臂负载与腰部姿态。</p>
+<p>557 N·m 如果是峰值能力，不能直接当作长期工作边界。工程上应改用电机和减速器允许的连续输出能力，并为以下因素保留余量：</p>
+<ul>
+<li>加减速引起的惯性力矩；</li>
+<li>末端负载估计误差；</li>
+<li>减速器效率与摩擦；</li>
+<li>抓取、落箱产生的冲击；</li>
+<li>结构柔性和控制误差；</li>
+<li>电机温升及持续工作时间。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这次计算揭示了三个层次的“可达”：</p>
+<ol>
+<li><strong>运动学可达</strong>：存在满足关节限位的姿态；</li>
+<li><strong>静力学可达</strong>：该姿态下 D5～D8 均不超过 557 N·m；</li>
+<li><strong>工程可用</strong>：进一步满足碰撞、动态力矩、连续额定能力和安全余量。</li>
+</ol>
+<p>对当前双臂各挂 10 kg 的模型，D6 是最频繁的限制来源，D5 决定部分极端峰值。若要求 D7 预先前倾后，D6 仍能走完整个正向行程，则 D7 从零位开始的连续可用前倾边界约为 11.92°。这类耦合约束正是仅靠单关节限位或几何可达图无法揭示的部分。</p>
+</div>
+  </div>
+  <nav class="post-navigation" aria-label="文章导航">
+    <span></span>
+    
+      <a class="post-navigation__next" href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/"><small>下一篇</small><span>麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记 →</span></a>
+    
+  </nav>
+</article>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>
