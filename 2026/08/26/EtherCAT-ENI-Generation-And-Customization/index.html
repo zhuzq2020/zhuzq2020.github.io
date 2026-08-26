@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>EtherCAT ENI 生成与定制流程：从扫描到 OP 状态验证 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/2026/08/26/EtherCAT-ENI-Generation-And-Customization/">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">文章</a>
+      <a class="" href="/archives/">归档</a>
+    </nav>
+    <div class="header-actions">
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <article class="article-shell">
+  <header class="article-header">
+    <a class="back-link" href="/">← 返回文章列表</a>
+    <div class="article-kicker">
+      <span>TECH NOTE</span>
+      <time datetime="2026-08-26T06:45:00.000Z">2026.08.26</time>
+    </div>
+    <h1>EtherCAT ENI 生成与定制流程：从扫描到 OP 状态验证</h1>
+    
+    <div class="article-stats">
+      <span>约 5 分钟阅读</span>
+      <span>2105 字</span>
+      
+        <span># EtherCAT</span><span># ENI</span><span># PDO Mapping</span><span># CoE</span><span># SDO</span><span># EC-Master</span>
+      
+    </div>
+  </header>
+  <div class="article-grid">
+    <aside class="article-rail" aria-hidden="true">
+      <span>READING</span>
+      <i></i>
+      <b>Z / 26</b>
+    </aside>
+    <div class="prose"><h2 id="总体流程"><a href="#总体流程" class="headerlink" title="总体流程"></a>总体流程</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">扫描实际从站</span><br><span class="line">   ↓</span><br><span class="line">EC-Engineer 读取 ESI/SII 和默认 PDO</span><br><span class="line">   ↓</span><br><span class="line">在 PDO Mapping 页面修改映射</span><br><span class="line">   ↓</span><br><span class="line">导出完整 ENI（包含 PDO、SM、FMMU、过程映像和 SDO InitCmd）</span><br><span class="line">   ↓</span><br><span class="line">EC-Master 加载新 ENI</span><br><span class="line">   ↓</span><br><span class="line">PREOP → SAFEOP 时自动通过 CoE SDO 写入 PDO 映射</span><br><span class="line">   ↓</span><br><span class="line">SAFEOP → OP，验证 WKC 和过程数据</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-扫描总线"><a href="#1-扫描总线" class="headerlink" title="1. 扫描总线"></a>1. 扫描总线</h2><p><code>emScanBus()</code> 逐站读 EEPROM&#x2F;SII，得到默认 SM、默认 PDO 映射、邮箱配置。</p>
+<h2 id="2-栈内生成-ENI"><a href="#2-栈内生成-ENI" class="headerlink" title="2. 栈内生成 ENI"></a>2. 栈内生成 ENI</h2><p><code>ecatConfigureNetwork(eCnfType_GenOpENI, EC_NULL, 0)</code> —— EniEngine 按扫描结果生成含默认映射的 ENI（demo 不带 <code>-f</code> 时的默认行为）。想留底的话用 <code>emConfigGet</code> 导出 XML 存盘。</p>
+<h2 id="3-手工修改-ENI（三处必须同步改）"><a href="#3-手工修改-ENI（三处必须同步改）" class="headerlink" title="3. 手工修改 ENI（三处必须同步改）"></a>3. 手工修改 ENI（三处必须同步改）</h2><ol>
+<li><code>&lt;ProcessData&gt;</code> 里目标从站的 <code>&lt;RxPdo&gt;</code>&#x2F;<code>&lt;TxPdo&gt;</code>：增删 <code>&lt;Entry&gt;</code>（Index&#x2F;SubIndex&#x2F;BitLen）。比如 CSP 精简映射删掉 <code>0x60FF</code> TargetVelocity，只留 <code>0x6040</code> + <code>0x607A</code> + <code>0x6060</code>；</li>
+<li>对应 <code>&lt;Sm2&gt;</code>&#x2F;<code>&lt;Sm3&gt;</code> 的 <code>&lt;Pdo&gt;</code> 列表，以及 <code>&lt;Send&gt;</code>&#x2F;<code>&lt;Recv&gt;</code> 的 <code>&lt;BitLength&gt;</code>；</li>
+<li><code>&lt;Cyclic&gt;</code>&#x2F;<code>&lt;Frame&gt;</code> 的帧数据长度——这是手改 ENI 最容易翻车的地方，帧布局必须与过程映像严格一致。</li>
+</ol>
+<h2 id="4-把新映射写入从站——两条路线"><a href="#4-把新映射写入从站——两条路线" class="headerlink" title="4. 把新映射写入从站——两条路线"></a>4. 把新映射写入从站——两条路线</h2><h3 id="路线-A：SDO-写进-ENI-的-CoE-InitCmds（推荐，主站自动执行）"><a href="#路线-A：SDO-写进-ENI-的-CoE-InitCmds（推荐，主站自动执行）" class="headerlink" title="路线 A：SDO 写进 ENI 的 CoE InitCmds（推荐，主站自动执行）"></a>路线 A：SDO 写进 ENI 的 CoE InitCmds（推荐，主站自动执行）</h3><p>ENI 里每个从站有 <code>&lt;CoE&gt;&lt;InitCmds&gt;</code> 节点。eni.xml 的 873 行起就有现成样例——主站在 PS（PreOp→SafeOP）转换时自动发出：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">InitCmd</span> <span class="attr">Fixed</span>=<span class="string">&quot;1&quot;</span> <span class="attr">CompleteAccess</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Transition</span>&gt;</span>PS<span class="tag">&lt;/<span class="name">Transition</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Comment</span>&gt;</span>download pdo 0x1C12 index<span class="tag">&lt;/<span class="name">Comment</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Ccs</span>&gt;</span>1<span class="tag">&lt;/<span class="name">Ccs</span>&gt;</span>            <span class="comment">&lt;!-- 1 = SDO Download --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Index</span>&gt;</span>7186<span class="tag">&lt;/<span class="name">Index</span>&gt;</span>     <span class="comment">&lt;!-- 0x1C12 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">SubIndex</span>&gt;</span>0<span class="tag">&lt;/<span class="name">SubIndex</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Data</span>&gt;</span>...<span class="tag">&lt;/<span class="name">Data</span>&gt;</span>        <span class="comment">&lt;!-- SI0=个数 + 各 PDO 索引，CompleteAccess 一次写完 --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">InitCmd</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>只需仿照这个格式为映射对象本身追加 InitCmd（见下方 CoE 写入顺序），主站切状态时就会自动配置从站。EC-Engineer 生成的定制 ENI 本质上就是干这件事——等于手工做了它的工作。</p>
+<h3 id="路线-B：应用代码在-PREOP-阶段手动发-SDO"><a href="#路线-B：应用代码在-PREOP-阶段手动发-SDO" class="headerlink" title="路线 B：应用代码在 PREOP 阶段手动发 SDO"></a>路线 B：应用代码在 PREOP 阶段手动发 SDO</h3><p>插入点：<code>EcDemoApp.cpp</code> 的 <code>ecatSetMasterState(SAFEOP)</code> 之前（此时总线已因 ConfigureNetwork 的 InitCmds 到达 PREOP）。</p>
+<p>API 用同步的 <code>emCoeSdoDownload</code>（读方向 demo 已有演示：<code>EcSdoServices.cpp</code> 里的 <code>emCoeGetODList</code>&#x2F;<code>emCoeSdoUpload</code>）。</p>
+<h3 id="CoE-写入顺序（两条路线通用）"><a href="#CoE-写入顺序（两条路线通用）" class="headerlink" title="CoE 写入顺序（两条路线通用）"></a>CoE 写入顺序（两条路线通用）</h3><p>无论哪条路线，CoE 写入顺序是规范固定的（ETG.1000.5），不可颠倒：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 1. 改 RxPdo 映射对象 0x1600 */</span></span><br><span class="line">SDO Download <span class="number">0x1600</span>:<span class="number">00</span> ← <span class="number">0</span>          <span class="comment">/* 清空，映射对象非 0 时禁止写入！ */</span></span><br><span class="line">SDO Download <span class="number">0x1600</span>:<span class="number">01</span> ← <span class="number">0x60400010</span> <span class="comment">/* idx&lt;&lt;16 | sub&lt;&lt;8 | bitlen */</span></span><br><span class="line">SDO Download <span class="number">0x1600</span>:<span class="number">02</span> ← <span class="number">0x607A0020</span></span><br><span class="line">SDO Download <span class="number">0x1600</span>:<span class="number">00</span> ← <span class="number">2</span>          <span class="comment">/* 写入实际条目数 = 激活 */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 2. 改 SM2 的 PDO 分配 0x1C12 */</span></span><br><span class="line">SDO Download <span class="number">0x1C12</span>:<span class="number">00</span> ← <span class="number">0</span></span><br><span class="line">SDO Download <span class="number">0x1C12</span>:<span class="number">01</span> ← <span class="number">0x1600</span></span><br><span class="line">SDO Download <span class="number">0x1C12</span>:<span class="number">00</span> ← <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 3. TxPdo 侧同理：0x1A00 映射 + 0x1C13 分配 */</span></span><br></pre></td></tr></table></figure>
+
+<p>支持 CompleteAccess 的从站可一次写完整对象（上面 ENI 样例的 <code>CompleteAccess=&quot;1&quot;</code> 就是这种写法）。</p>
+<h2 id="5-切-SAFEOP-→-OP-验证"><a href="#5-切-SAFEOP-→-OP-验证" class="headerlink" title="5. 切 SAFEOP → OP 验证"></a>5. 切 SAFEOP → OP 验证</h2><p><code>ecatSetMasterState(SAFEOP)</code> 时主站按 ENI 配 SM&#x2F;FMMU，从站校验实际映射与 SM 配置一致——一致则 OP 可达。之后 demo 加 <code>-v</code> 能打印每站实际激活的 PDO 与过程映像偏移。</p>
+</div>
+  </div>
+  <nav class="post-navigation" aria-label="文章导航">
+    <span></span>
+    
+      <a class="post-navigation__next" href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/"><small>下一篇</small><span>EtherCAT PDO 与 CSP 控制笔记：固定映射、周期插值与反馈链路 →</span></a>
+    
+  </nav>
+</article>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>
