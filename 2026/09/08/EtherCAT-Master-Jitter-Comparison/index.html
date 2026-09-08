@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>D22 三种 EtherCAT 主站位置与周期抖动对比 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/2026/09/08/EtherCAT-Master-Jitter-Comparison/">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">文章</a>
+      <a class="" href="/archives/">归档</a>
+    </nav>
+    <div class="header-actions">
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <article class="article-shell">
+  <header class="article-header">
+    <a class="back-link" href="/">← 返回文章列表</a>
+    <div class="article-kicker">
+      <span>TECH NOTE</span>
+      <time datetime="2026-09-08T07:00:32.000Z">2026.09.08</time>
+    </div>
+    <h1>D22 三种 EtherCAT 主站位置与周期抖动对比</h1>
+    
+    <div class="article-stats">
+      <span>约 5 分钟阅读</span>
+      <span>2294 字</span>
+      
+        <span># EtherCAT</span><span># EC-Master</span><span># 运动控制</span><span># SOEM</span><span># IgH</span><span># CSP</span>
+      
+    </div>
+  </header>
+  <div class="article-grid">
+    <aside class="article-rail" aria-hidden="true">
+      <span>READING</span>
+      <i></i>
+      <b>Z / 26</b>
+    </aside>
+    <div class="prose"><h2 id="1-数据范围"><a href="#1-数据范围" class="headerlink" title="1. 数据范围"></a>1. 数据范围</h2><p>本报告对比同一套固定右臂末端轨迹在三种主站下的 D22 数据：</p>
+<table>
+<thead>
+<tr>
+<th>主站</th>
+<th>周期日志</th>
+<th align="right">样本数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-Master</td>
+<td><code>cycle_ecmaster_20260908_141617.csv</code></td>
+<td align="right">150,182</td>
+</tr>
+<tr>
+<td>SOEM</td>
+<td><code>cycle_soem_20260908_141257.csv</code></td>
+<td align="right">176,419</td>
+</tr>
+<tr>
+<td>IgH</td>
+<td><code>cycle_igh_20260908_140958.csv</code></td>
+<td align="right">154,172</td>
+</tr>
+</tbody></table>
+<p>三次运动都包含 133,404 个有效 <code>executing</code> 周期，周期日志无丢弃、无周期编号缺口。图中时间以每份日志的第一个运动样本对齐为 0。SOEM 曲线在轨迹完成后延续更久，只说明该主站在运动结束后又记录了一段零位保持，不代表 SOEM 的轨迹执行更慢。</p>
+<p>当前结论基于每种主站各一次运行，只能作为初步结果，不能代替多次重复实验。</p>
+<h2 id="2-完整对比图"><a href="#2-完整对比图" class="headerlink" title="2. 完整对比图"></a>2. 完整对比图</h2><p><img src="/images/ethercat-master-jitter-comparison/d22_full_comparison.png" alt="D22 三主站完整位置与周期对比"></p>
+<p>上图分为三部分：</p>
+<ol>
+<li><strong>Position &#x2F; time</strong>：实线是驱动反馈的实际位置 <code>actual</code>，虚线是本周期准备发送的位置目标 <code>target</code>。</li>
+<li><strong>Actual - prior target</strong>：实际位置减去上一控制周期准备的目标位置，用于观察动态跟随误差。</li>
+<li><strong>Sample interval</strong>：相邻两次控制回调日志时间戳之差，理想值为 1 ms。</li>
+</ol>
+<h2 id="3-目标位置和实际位置是否相同"><a href="#3-目标位置和实际位置是否相同" class="headerlink" title="3. 目标位置和实际位置是否相同"></a>3. 目标位置和实际位置是否相同</h2><p>三种主站使用相同的固定目标、轨迹时长和五次插值，因此目标曲线应当高度一致。按运动周期序号比较，三版目标值的最大差异约为 <strong>1.9–3.8 µrad</strong>。</p>
+<p>实际位置也高度接近，但并不相同：</p>
+<table>
+<thead>
+<tr>
+<th>对比</th>
+<th align="right">实际位置差 RMS</th>
+<th align="right">最大实际位置差</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-Master 与 SOEM</td>
+<td align="right">8.12 µrad</td>
+<td align="right">89.70 µrad</td>
+</tr>
+<tr>
+<td>EC-Master 与 IgH</td>
+<td align="right">9.42 µrad</td>
+<td align="right">116.76 µrad</td>
+</tr>
+<tr>
+<td>SOEM 与 IgH</td>
+<td align="right">7.66 µrad</td>
+<td align="right">109.16 µrad</td>
+</tr>
+</tbody></table>
+<p>完整位置图的纵轴跨度约 3 rad，上述微小差异会被压在同一像素附近。图中最后绘制的绿色 IgH 曲线还会覆盖下方的红色和蓝色曲线，所以肉眼看起来像一条线。要观察细微位置变化，应勾选“位置去均值放大”，再框选某个静止平台。</p>
+<h2 id="4-Prior-target-的含义"><a href="#4-Prior-target-的含义" class="headerlink" title="4. Prior target 的含义"></a>4. Prior target 的含义</h2><p><code>target</code> 是控制器在当前 1 ms 周期计算并准备输出的位置目标；<code>prior target</code> 是上一控制周期准备的位置目标。</p>
+<p>控制周期通常先接收从站反馈，再计算并发送新输出，因此当前读到的实际位置在时间上更接近先前发出的目标。工具使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">跟随误差 = 当前 actual - previous_target_rad</span><br></pre></td></tr></table></figure>
+
+<p>这个量包含轨迹跟随误差、总线延迟、驱动内部伺服响应和机械响应，不能单独解释为机械抖动。运动时出现正负波峰主要是加速、减速过程中的跟随滞后。</p>
+<table>
+<thead>
+<tr>
+<th>主站</th>
+<th align="right">运动跟随误差 RMS</th>
+<th align="right">最大绝对误差</th>
+<th align="right">峰峰值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-Master</td>
+<td align="right">0.002574 rad</td>
+<td align="right">0.007556 rad</td>
+<td align="right">0.015096 rad</td>
+</tr>
+<tr>
+<td>SOEM</td>
+<td align="right">0.002573 rad</td>
+<td align="right">0.007550 rad</td>
+<td align="right">0.015098 rad</td>
+</tr>
+<tr>
+<td>IgH</td>
+<td align="right">0.002574 rad</td>
+<td align="right">0.007555 rad</td>
+<td align="right">0.015096 rad</td>
+</tr>
+</tbody></table>
+<p>三种主站的动态跟随结果几乎一致，当前数据没有显示某一种主站在运动跟随方面具有明显优势。</p>
+<h2 id="5-Sample-interval-的含义和红色区域"><a href="#5-Sample-interval-的含义和红色区域" class="headerlink" title="5. Sample interval 的含义和红色区域"></a>5. Sample interval 的含义和红色区域</h2><p><code>Sample interval</code> 的计算方式是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">本次控制回调的 monotonic 时间 - 上次控制回调的 monotonic 时间</span><br></pre></td></tr></table></figure>
+
+<p>它测量 Linux 主机侧控制回调的时间稳定性，包括线程调度、主站收发和 DC 相位调整的影响。它不是网线上两个 EtherCAT 帧的硬件时间间隔，也不是驱动内部伺服周期。</p>
+<p><img src="/images/ethercat-master-jitter-comparison/d22_interval_zoom_and_distribution.png" alt="D22 周期局部放大与完整分布"></p>
+<p>完整图里 SOEM 看起来是一整块红色，是因为 17 万多个点在约 1600 个横向像素内快速上下连接，同时绘图降采样会保留每个时间桶的最大值和最小值。蓝色 EC-Master 和绿色 IgH 大部分集中在 1 ms 附近，互相覆盖后只剩一条细线。局部放大可以看到红色 SOEM 存在相邻长、短周期配对，而不是连续填满整个红色区域。</p>
+<table>
+<thead>
+<tr>
+<th>主站</th>
+<th align="right">平均周期</th>
+<th align="right">P99</th>
+<th align="right">最小值</th>
+<th align="right">最大值</th>
+<th align="right">标准差</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-Master</td>
+<td align="right">1.0000 ms</td>
+<td align="right"><strong>1.0034 ms</strong></td>
+<td align="right">0.9889 ms</td>
+<td align="right">1.0118 ms</td>
+<td align="right"><strong>0.0010 ms</strong></td>
+</tr>
+<tr>
+<td>SOEM</td>
+<td align="right">1.0000 ms</td>
+<td align="right">1.2355 ms</td>
+<td align="right">0.6439 ms</td>
+<td align="right">1.3556 ms</td>
+<td align="right">0.0352 ms</td>
+</tr>
+<tr>
+<td>IgH</td>
+<td align="right">1.0000 ms</td>
+<td align="right">1.0044 ms</td>
+<td align="right">0.7395 ms</td>
+<td align="right">1.2589 ms</td>
+<td align="right">0.0030 ms</td>
+</tr>
+</tbody></table>
+<p>平均周期都是 1 ms，说明长期频率正确。EC-Master 的应用层周期最稳定；IgH 绝大多数周期同样接近 1 ms，但存在少量离群值；SOEM 的周期分布明显更宽。SOEM 代码会根据 DC 相位误差调整下一次唤醒时间，Linux 调度和这项修正都可能产生长短周期，需要进一步记录 DC 修正量才能分离两者影响。</p>
+<h2 id="6-静止位置抖动"><a href="#6-静止位置抖动" class="headerlink" title="6. 静止位置抖动"></a>6. 静止位置抖动</h2><p>工具只统计满足以下条件的连续静止段：驱动已使能、CSP 模式、主站和周期通信健康、目标不变，并排除每段开始的 250 ms。每段误差先去均值，再合并计算 RMS 和峰峰值。</p>
+<p><img src="/images/ethercat-master-jitter-comparison/d22_key_metrics.png" alt="D22 静止位置和周期关键指标"></p>
+<table>
+<thead>
+<tr>
+<th>主站</th>
+<th align="right">静止 RMS</th>
+<th align="right">静止峰峰值</th>
+<th align="right">约合 D22 编码器计数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-Master</td>
+<td align="right">1.318 µrad</td>
+<td align="right">12.815 µrad</td>
+<td align="right">约 27 counts 峰峰值</td>
+</tr>
+<tr>
+<td>SOEM</td>
+<td align="right"><strong>0.852 µrad</strong></td>
+<td align="right"><strong>8.069 µrad</strong></td>
+<td align="right">约 17 counts 峰峰值</td>
+</tr>
+<tr>
+<td>IgH</td>
+<td align="right">1.046 µrad</td>
+<td align="right">9.492 µrad</td>
+<td align="right">约 20 counts 峰峰值</td>
+</tr>
+</tbody></table>
+<p>本次运行中 SOEM 的静止位置数值最小，IgH 次之，EC-Master 最大。但三者差距只有几个编码器计数，而且每种主站只有一次实验。SOEM 的主机周期波动较大，却没有对应地表现为更大的 D22 静止位置抖动，说明不能把应用层周期抖动直接等同于电机机械抖动。</p>
+<h2 id="7-当前结论"><a href="#7-当前结论" class="headerlink" title="7. 当前结论"></a>7. 当前结论</h2><ul>
+<li><strong>宏观轨迹</strong>：三种主站基本一致。</li>
+<li><strong>运动跟随</strong>：三种主站的 RMS 和峰值几乎相同，没有明显优劣。</li>
+<li><strong>主机周期稳定性</strong>：EC-Master 最好，IgH 的主体分布接近 EC-Master，SOEM 明显更宽。</li>
+<li><strong>日志完整性</strong>：三份日志均无丢弃和周期缺口。</li>
+</ul>
+</div>
+  </div>
+  <nav class="post-navigation" aria-label="文章导航">
+    <span></span>
+    
+      <a class="post-navigation__next" href="/2026/08/26/EtherCAT-ENI-Generation-And-Customization/"><small>下一篇</small><span>EtherCAT ENI 生成与定制流程：从扫描到 OP 状态验证 →</span></a>
+    
+  </nav>
+</article>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>
