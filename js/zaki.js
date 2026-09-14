@@ -3,11 +3,22 @@
   const toggle = document.querySelector('.theme-toggle');
   const progress = document.querySelector('.reading-progress span');
 
+  const updateGiscusTheme = (theme) => {
+    const iframe = document.querySelector('iframe.giscus-frame');
+    if (!iframe || !iframe.contentWindow) return;
+    const giscusTheme = theme === 'light' ? 'light' : 'dark_dimmed';
+    iframe.contentWindow.postMessage(
+      { giscus: { setConfig: { theme: giscusTheme } } },
+      'https://giscus.app'
+    );
+  };
+
   if (toggle) {
     toggle.addEventListener('click', () => {
       const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
       root.dataset.theme = next;
       localStorage.setItem('zaki-theme', next);
+      updateGiscusTheme(next);
     });
   }
 
@@ -21,3 +32,4 @@
   updateProgress();
   window.addEventListener('scroll', updateProgress, { passive: true });
 })();
+
