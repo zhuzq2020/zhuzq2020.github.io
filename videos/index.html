@@ -48,7 +48,7 @@
     <div class="section-heading">
       <div>
         <h1 class="page-title">视频与实机演示</h1>
-        <p class="page-lead">算法仿真与硬件在环实测记录。支持在博客内直接播放，或跳转至 Bilibili 观看高清原片。</p>
+        <p class="page-lead">算法仿真与硬件在环实测记录。支持直接在博客内加载播放，或跳转至 Bilibili 观看高清原片。</p>
       </div>
       <a class="text-link" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer">Bilibili 个人空间 <span>↗</span></a>
     </div>
@@ -57,18 +57,26 @@
   <div class="project-grid project-grid--page">
     
       
+        
         <div class="project-card video-card">
-          <div class="video-player-wrap" data-bvid="BV1H21nBrErb">
+          <div class="video-player-wrap" data-src="//player.bilibili.com/player.html?bvid=BV1H21nBrErb&amp;aid=115494858331627&amp;cid=33709624566&amp;page=1&amp;high_quality=1&amp;danmaku=0">
+            
+              <div class="video-cover-overlay" title="点击在网页内播放" onclick="playVideo(this)">
+                <img src="https://i0.hdslb.com/bfs/archive/2328320cf439d9f9f14ce2a2b071c6896e6139b2.jpg" alt="Mujoco机械臂3D运动学建模与逆解抓取" referrerpolicy="no-referrer" loading="lazy" />
+                <div class="video-play-btn">
+                  <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                </div>
+              </div>
+            
             <iframe 
-              src="https://player.bilibili.com/player.html?bvid=BV1H21nBrErb&page=1&high_quality=1&danmaku=0&as_wide=1" 
+              src="" 
               scrolling="no" 
               border="0" 
               frameborder="no" 
               framespacing="0" 
               allowfullscreen="true"
+              allow="autoplay; fullscreen"
               loading="lazy"
-              referrerpolicy="no-referrer"
-              sandbox="allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts"
               title="Mujoco机械臂3D运动学建模与逆解抓取">
             </iframe>
           </div>
@@ -106,18 +114,26 @@
           </div>
         </div>
       
+        
         <div class="project-card video-card">
-          <div class="video-player-wrap" data-bvid="BV1YfWvzAEDe">
+          <div class="video-player-wrap" data-src="//player.bilibili.com/player.html?bvid=BV1YfWvzAEDe&amp;aid=115382669023768&amp;cid=33118289946&amp;page=1&amp;high_quality=1&amp;danmaku=0">
+            
+              <div class="video-cover-overlay" title="点击在网页内播放" onclick="playVideo(this)">
+                <img src="https://i1.hdslb.com/bfs/archive/bb7197bd9edaa080fd24f31933b303ed9e0c9cf6.jpg" alt="机械臂3D运动学建模 (IKPy + Mujoco)" referrerpolicy="no-referrer" loading="lazy" />
+                <div class="video-play-btn">
+                  <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                </div>
+              </div>
+            
             <iframe 
-              src="https://player.bilibili.com/player.html?bvid=BV1YfWvzAEDe&page=1&high_quality=1&danmaku=0&as_wide=1" 
+              src="" 
               scrolling="no" 
               border="0" 
               frameborder="no" 
               framespacing="0" 
               allowfullscreen="true"
+              allow="autoplay; fullscreen"
               loading="lazy"
-              referrerpolicy="no-referrer"
-              sandbox="allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts"
               title="机械臂3D运动学建模 (IKPy + Mujoco)">
             </iframe>
           </div>
@@ -155,18 +171,26 @@
           </div>
         </div>
       
+        
         <div class="project-card video-card">
-          <div class="video-player-wrap" data-bvid="BV1NMwEzmEoZ">
+          <div class="video-player-wrap" data-src="//player.bilibili.com/player.html?bvid=BV1NMwEzmEoZ&amp;aid=116237921226761&amp;cid=36737780491&amp;page=1&amp;high_quality=1&amp;danmaku=0">
+            
+              <div class="video-cover-overlay" title="点击在网页内播放" onclick="playVideo(this)">
+                <img src="https://i2.hdslb.com/bfs/archive/83f96586ca85f131b7d5b80a801caa04bb5305c5.jpg" alt="树莓派+ESP32实现自动巡线小车" referrerpolicy="no-referrer" loading="lazy" />
+                <div class="video-play-btn">
+                  <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                </div>
+              </div>
+            
             <iframe 
-              src="https://player.bilibili.com/player.html?bvid=BV1NMwEzmEoZ&page=1&high_quality=1&danmaku=0&as_wide=1" 
+              src="" 
               scrolling="no" 
               border="0" 
               frameborder="no" 
               framespacing="0" 
               allowfullscreen="true"
+              allow="autoplay; fullscreen"
               loading="lazy"
-              referrerpolicy="no-referrer"
-              sandbox="allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts"
               title="树莓派+ESP32实现自动巡线小车">
             </iframe>
           </div>
@@ -207,6 +231,20 @@
     
   </div>
 </div>
+
+<script>
+function playVideo(overlay) {
+  var wrap = overlay.parentElement;
+  var iframe = wrap.querySelector('iframe');
+  var src = wrap.getAttribute('data-src');
+  if (iframe && src) {
+    if (!iframe.getAttribute('src')) {
+      iframe.setAttribute('src', src + '&autoplay=1');
+    }
+  }
+  overlay.style.display = 'none';
+}
+</script>
 
     </main>
     <script src="/js/zaki.js"></script>
