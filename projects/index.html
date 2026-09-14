@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>开源项目 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/projects/index.html">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">主页</a>
+      <a class="" href="/posts/">文章</a>
+      <a class="is-active" href="/projects/">开源项目</a>
+    </nav>
+    <div class="header-actions">
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <div class="projects-page-shell">
+  <header class="page-header">
+    <p class="eyebrow"><span></span>OPEN SOURCE / LAB TOOLS</p>
+    <div class="section-heading">
+      <div>
+        <h1 class="page-title">开源工具与工程项目</h1>
+        <p class="page-lead">在工业以太网现场与机器人控制调试中，打造真正解决痛点、经受实机检验的开源工具。</p>
+      </div>
+      <a class="text-link" href="https://github.com/zhuzq2020?tab=repositories" target="_blank" rel="noopener noreferrer">所有 GitHub 仓库 <span>↗</span></a>
+    </div>
+  </header>
+
+  <div class="project-grid project-grid--page">
+    
+      
+        <div class="project-card">
+          <div class="project-card__top">
+            <span class="project-card__badge">OPEN SOURCE / C++</span>
+            <a class="project-card__gh-link" href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer" aria-label="EtherCAT_CiA402_Monitor 源码仓库">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            </a>
+          </div>
+          <h3 class="project-card__title">
+            <a href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer">EtherCAT_CiA402_Monitor</a>
+          </h3>
+          <p class="project-card__desc">基于 SOEM 的通用 EtherCAT CiA402 状态诊断与多从站监控器，支持 CoE / SDO 只读在线扫描与状态机实时追踪。</p>
+          
+            <div class="project-card__tags">
+              
+                <span>#EtherCAT</span>
+              
+                <span>#SOEM</span>
+              
+                <span>#CiA-402</span>
+              
+                <span>#运动控制</span>
+              
+            </div>
+          
+          <div class="project-card__actions">
+            <a class="project-btn project-btn--primary" href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer">GitHub 源码 ↗</a>
+            
+              <a class="project-btn project-btn--secondary" href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">相关实测笔记 →</a>
+            
+          </div>
+        </div>
+      
+        <div class="project-card">
+          <div class="project-card__top">
+            <span class="project-card__badge">OPEN SOURCE / PYTHON</span>
+            <a class="project-card__gh-link" href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer" aria-label="motor_jitter_viewer 源码仓库">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            </a>
+          </div>
+          <h3 class="project-card__title">
+            <a href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer">motor_jitter_viewer</a>
+          </h3>
+          <p class="project-card__desc">跨主站（EC-Master / SOEM / IgH）电机位置跟踪曲线与周期抖动对比分析工具，支持微秒级抖动分布统计与可视化生成。</p>
+          
+            <div class="project-card__tags">
+              
+                <span>#EtherCAT</span>
+              
+                <span>#EC-Master</span>
+              
+                <span>#IgH</span>
+              
+                <span>#抖动分析</span>
+              
+            </div>
+          
+          <div class="project-card__actions">
+            <a class="project-btn project-btn--primary" href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer">GitHub 源码 ↗</a>
+            
+              <a class="project-btn project-btn--secondary" href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">相关实测笔记 →</a>
+            
+          </div>
+        </div>
+      
+    
+  </div>
+</div>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>
