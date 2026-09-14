@@ -29,6 +29,7 @@
     </a>
     <nav class="main-nav" aria-label="主导航">
       <a class="" href="/">文章</a>
+      <a class="" href="/#projects">开源项目</a>
       <a class="" href="/archives/">归档</a>
     </nav>
     <div class="header-actions">
@@ -50,8 +51,8 @@
     <h1>EtherCAT 与 CANopen/CiA 402 伺服控制入门：从 CoE、SDO/PDO 到状态机</h1>
     
     <div class="article-stats">
-      <span>约 9 分钟阅读</span>
-      <span>4338 字</span>
+      <span>约 10 分钟阅读</span>
+      <span>4558 字</span>
       
         <span># EtherCAT</span><span># CANopen</span><span># CiA 402</span><span># 伺服控制</span>
       
@@ -275,6 +276,11 @@
 <li><strong>CiA 402</strong> 解决驱动器如何使能、如何运行以及如何处理故障。</li>
 </ul>
 <p>调试时也应按层排查：先确认 EtherCAT 链路与从站状态，再确认 PDO 映射和工作计数器，最后检查 CiA 402 状态机、运行模式与目标值。把总线状态和驱动器状态分开观察，通常能更快定位问题。</p>
+<h2 id="八、相关开源工具推荐"><a href="#八、相关开源工具推荐" class="headerlink" title="八、相关开源工具推荐"></a>八、相关开源工具推荐</h2><p>在实际调试 EtherCAT 从站、观察 CiA 402 状态机或对比主站抖动时，欢迎参考配套开源工程：</p>
+<ul>
+<li>🔍 <strong><a target="_blank" rel="noopener" href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor">EtherCAT_CiA402_Monitor</a></strong>：基于 SOEM + Qt 6 的通用 EtherCAT CiA402 状态诊断器，支持从站标准字典只读在线监控与周期扫描。</li>
+<li>📈 <strong><a target="_blank" rel="noopener" href="https://github.com/zhuzq2020/motor_jitter_viewer">motor_jitter_viewer</a></strong>：跨主站（EC-Master &#x2F; SOEM &#x2F; IgH）电机位置跟踪曲线与通信周期抖动多维度对比分析与可视化工具。</li>
+</ul>
 </div>
   </div>
   <nav class="post-navigation" aria-label="文章导航">
@@ -282,7 +288,7 @@
       <a href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/"><small>上一篇</small><span>← 麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记</span></a>
     
     
-      <a class="post-navigation__next" href="/2025/08/12/Visual%20Studio%20use%20vcpkg%20to%20install%20pthread/"><small>下一篇</small><span>Visual Studio用vcpkg安装pthread →</span></a>
+      <a class="post-navigation__next" href="/2025/08/12/KMPAlgorithm/"><small>下一篇</small><span>KMP算法详解 →</span></a>
     
   </nav>
 </article>
