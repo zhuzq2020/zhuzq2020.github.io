@@ -43,49 +43,120 @@
     <main class="site-main">
       <div class="home-shell home-shell--about">
   <section class="intro-panel intro-panel--home" aria-labelledby="intro-title">
-    <div class="home-about">
-      <p class="eyebrow"><span></span>ZAKI / LAB NOTES / ABOUT ME</p>
-      <h1 id="intro-title" class="home-about__title">你好，我是 <em>宅总 zaki</em></h1>
-      <p class="home-about__role">机器人与工业总线软件工程师</p>
-      
-      <div class="home-about__bio">
-        
-          
-            <p>专注于工业以太网现场总线（EtherCAT、CANopen）、嵌入式实时系统（Linux PREEMPT_RT）以及多关节机器人运动学与动力学控制研发。</p>
-          
-            <p>坚持“现场在环、实测数据闭环”的工程态度，拒绝纸上谈兵。把复杂的工业协议栈对接、实时周期抖动优化与机械运动控制，拆解为严谨可验证的工程方案与开源工具。</p>
-          
-        
+    <div class="home-about home-readme">
+      <h1 id="intro-title" class="readme-title">Hi there, I'm Zaki (zhuzq2020) 👋</h1>
+
+      <blockquote class="readme-quote">
+        <p><strong>Robotics & Industrial Bus Software Engineer</strong> | 专注于工业总线、具身智能整机系统与机器人运动控制</p>
+      </blockquote>
+
+      <div class="readme-badges">
+        <a href="https://zhuzq2020.github.io"><img src="https://img.shields.io/badge/My_Blog-zhuzq2020.github.io-blue?style=flat-square&logo=hexo&logoColor=white" alt="Blog" /></a>
+        <a href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/GitHub-zhuzq2020-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub" /></a>
+        <img src="https://img.shields.io/github/followers/zhuzq2020?style=flat-square&color=2ea44f" alt="Followers" />
+        <img src="https://img.shields.io/badge/Total_Repos-14-blue?style=flat-square" alt="Repositories" />
       </div>
 
-      <div class="focus-matrix">
-        <h2 class="focus-matrix__heading">核心技术与研发方向</h2>
-        <div class="focus-grid">
-          
-            
-              <div class="focus-card">
-                <h3>现场总线与主站协议栈</h3>
-                <p>EtherCAT (SOEM / IgH / acontis EC-Master)、CANopen / CiA 402 伺服状态机、CoE / SDO / PDO 映射与总线通信抖动优化</p>
-              </div>
-            
-              <div class="focus-card">
-                <h3>机器人运动学与控制</h3>
-                <p>ROS 2、多轴机械臂可达工作空间分析、逆运动学求解、麦克纳姆轮底盘动力学建模与静力学扭矩校核</p>
-              </div>
-            
-              <div class="focus-card">
-                <h3>实时系统与底层工程</h3>
-                <p>Modern C++ (C++20)、Linux 实时内核深度调优、Python 测量数据处理与正态分布抖动分析</p>
-              </div>
-            
-          
-        </div>
+      <hr class="readme-divider" />
+
+      <h3 class="readme-heading">🛠️ 技能图谱与技术栈 (Tech Stack)</h3>
+
+      <h4 class="readme-subheading">编程语言 (Languages)</h4>
+      <div class="badge-group">
+        <img src="https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white" alt="C++" />
+        <img src="https://img.shields.io/badge/C-A8B9CC?style=for-the-badge&logo=c&logoColor=white" alt="C" />
+        <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
       </div>
+
+      <h4 class="readme-subheading">工业通信与运动控制 (Industrial Bus & Motion Control)</h4>
+      <div class="badge-group">
+        <img src="https://img.shields.io/badge/EtherCAT-CiA402%20%7C%20SOEM%20%7C%20IgH-008080?style=for-the-badge" alt="EtherCAT" />
+        <img src="https://img.shields.io/badge/TwinCAT%203-Beckhoff%20PLC-003366?style=for-the-badge" alt="TwinCAT 3" />
+        <img src="https://img.shields.io/badge/Motion%20Control-Multi--Axis%20Trajectory-2b5797?style=for-the-badge" alt="Motion Control" />
+        <img src="https://img.shields.io/badge/Motor%20Drivers-DRV8461%20%7C%20Steppers%20%7C%20Servos-5c2d91?style=for-the-badge" alt="Motor Drivers" />
+      </div>
+
+      <h4 class="readme-subheading">机器人与具身智能 (Robotics & Embodied AI)</h4>
+      <div class="badge-group">
+        <img src="https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy-22314E?style=for-the-badge&logo=ros&logoColor=white" alt="ROS 2" />
+        <img src="https://img.shields.io/badge/NVIDIA-Jetson%20AGX%20Orin-76B900?style=for-the-badge&logo=nvidia&logoColor=white" alt="NVIDIA Jetson" />
+        <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV" />
+        <img src="https://img.shields.io/badge/Sensors-Livox%20MID--360%20%7C%20Gemini%20335L-E95420?style=for-the-badge" alt="Sensors" />
+      </div>
+
+      <h4 class="readme-subheading">界面开发与嵌入式系统 (GUI & Embedded Systems)</h4>
+      <div class="badge-group">
+        <img src="https://img.shields.io/badge/Qt-6%20Widgets%20%7C%20QML-41CD52?style=for-the-badge&logo=qt&logoColor=white" alt="Qt 6" />
+        <img src="https://img.shields.io/badge/ESP32-WROOM32%20%7C%20FreeRTOS-E7352C?style=for-the-badge&logo=espressif&logoColor=white" alt="ESP32" />
+        <img src="https://img.shields.io/badge/Linux-Ubuntu%20RT%20Preempt-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux RT" />
+        <img src="https://img.shields.io/badge/CAD-SolidWorks%203D-ff5722?style=for-the-badge" alt="CAD" />
+      </div>
+
+      <hr class="readme-divider" />
+
+      <h3 class="readme-heading">🚀 核心项目矩阵 (Core Project Matrix)</h3>
+
+      <div class="readme-table-wrap">
+        <table class="readme-table">
+          <thead>
+            <tr>
+              <th>领域</th>
+              <th>核心项目 / 成果</th>
+              <th>技术栈</th>
+              <th>亮点特色</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>工业总线测试</strong></td>
+              <td><a href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer"><code>motor_jitter_viewer</code></a></td>
+              <td>Python, Matplotlib</td>
+              <td>跨主站（EC-Master / SOEM / IgH）电机位置跟踪曲线与 EtherCAT 通信周期抖动多维度对比分析</td>
+            </tr>
+            <tr>
+              <td><strong>工业诊断监控</strong></td>
+              <td><a href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer"><code>EtherCAT_CiA402_Monitor</code></a></td>
+              <td>C++, SOEM, CoE/SDO</td>
+              <td>基于 SOEM 的通用 EtherCAT CiA402 状态诊断器，支持从站标准字典只读在线监控与周期扫描</td>
+            </tr>
+            <tr>
+              <td><strong>具身整机调度</strong></td>
+              <td><code>robot_manager</code></td>
+              <td>C++, ROS 2, PCL</td>
+              <td>机器人整机系统调度管理器，集成 Livox MID-360 激光雷达、Gemini 335L 深度相机、双工语音交互与多节点容灾</td>
+            </tr>
+            <tr>
+              <td><strong>机械臂运控</strong></td>
+              <td><code>soem_robot_arm</code></td>
+              <td>C, SOEM, EtherCAT</td>
+              <td>基于 SOEM 的 7 自由度工业机械臂总线运控工程，支持 7 轴闭环联动、轨迹生成与 PDO 映射规整化</td>
+            </tr>
+            <tr>
+              <td><strong>四足机器人</strong></td>
+              <td><code>RobotDog</code></td>
+              <td>ESP32, Qt 6, SolidWorks</td>
+              <td>20路舵机四足机器狗全栈工程，包含 WiFi TCP 上位机控制协议、底层步态驱动与 3D 机械结构设计</td>
+            </tr>
+            <tr>
+              <td><strong>技术知识库</strong></td>
+              <td><a href="/posts/"><code>zhuzq2020.github.io</code></a></td>
+              <td>Hexo, Markdown</td>
+              <td>记录工业通信、EtherCAT 踩坑实录、机器人运动学算法及嵌入式底层开发经验的个人技术博客</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="readme-divider" />
+
+      <p class="readme-quote-footer">
+        <em>"Talk is cheap, show me the code."</em>
+      </p>
 
       <div class="home-actions">
         <a class="home-btn home-btn--primary" href="/posts/">浏览技术笔记 <span>→</span></a>
         <a class="home-btn home-btn--secondary" href="/projects/">探索开源项目 <span>↗</span></a>
-        <a class="home-btn home-btn--ghost" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer">GitHub <span>↗</span></a>
+        <a class="home-btn home-btn--ghost" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer">GitHub 个人主页 <span>↗</span></a>
       </div>
     </div>
 
