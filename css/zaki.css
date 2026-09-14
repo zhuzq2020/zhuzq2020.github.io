@@ -273,7 +273,8 @@ a:focus-visible {
 }
 
 .posts-page-shell,
-.projects-page-shell {
+.projects-page-shell,
+.videos-page-shell {
   padding: 56px 0 88px;
 }
 
@@ -814,6 +815,149 @@ a:focus-visible {
   transform: translateY(-1px);
 }
 
+/* 视频页样式 */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 28px;
+  margin-top: 24px;
+}
+
+.video-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: linear-gradient(155deg, var(--surface), var(--surface-soft));
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--cyan);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32), 0 0 35px color-mix(in srgb, var(--cyan) 14%, transparent);
+}
+
+.video-player-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 标准比例 */
+  height: 0;
+  background: #000;
+  border-bottom: 1px solid var(--line);
+}
+
+.video-player-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video-card__body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 24px;
+}
+
+.video-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.video-card__tag-bvid {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--pink);
+  background: var(--surface-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.video-card__duration {
+  color: var(--faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.video-card__title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+}
+
+.video-card__title a {
+  color: var(--text);
+  transition: color 0.2s ease;
+}
+
+.video-card__title a:hover {
+  color: var(--cyan);
+}
+
+.video-card__desc {
+  flex-grow: 1;
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.video-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.video-card__tags span {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  background: var(--surface-soft);
+}
+
+.video-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.video-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.video-link-btn:hover {
+  color: var(--pink);
+}
+
 .writing-section {
   padding-top: 72px;
   border-top: 1px solid var(--line-strong);
@@ -1220,6 +1364,42 @@ a:focus-visible {
   border-radius: 12px;
 }
 
+.prose video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 2em auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #000;
+  box-shadow: var(--shadow);
+}
+
+.prose .video-container,
+.prose .bilibili-video {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 比例自适应 */
+  height: 0;
+  margin: 2em 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+}
+
+.prose .video-container iframe,
+.prose .bilibili-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .prose table {
   display: block;
   overflow-x: auto;
@@ -1441,13 +1621,15 @@ a:focus-visible {
     margin-bottom: 12px;
   }
 
-  .project-grid {
+  .project-grid,
+  .video-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .project-card {
-    padding: 22px;
+  .project-card,
+  .video-card__body {
+    padding: 20px;
   }
 
   .writing-section {
