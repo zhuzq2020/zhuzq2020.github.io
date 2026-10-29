@@ -26,9 +26,6 @@
     <div class="reading-progress" aria-hidden="true"><span></span></div>
     <header class="site-header">
   <div class="header-inner">
-    <a class="wordmark" href="/" aria-label="Home">
-      <span>ZAKI</span><i>/</i><strong>ROBOTICS</strong>
-    </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a class="" href="/">About</a>
       <a class="" href="/posts/">Writing</a>
@@ -46,43 +43,6 @@
   </div>
 </header>
 
-    
-      <section class="visitor-stats-panel visitor-stats-panel--compact" aria-label="Site statistics">
-  <div class="visitor-stats" data-visitor-stats
-       data-hostname="zhuzq2020.github.io"
-       data-online-key="fdw1ebicbr">
-    <div class="visitor-stats__heading">
-      <span class="visitor-stats__dot" aria-hidden="true"></span>
-      <span>SITE STATISTICS</span>
-    </div>
-    <dl class="visitor-stats__metrics">
-      <div class="visitor-stats__metric">
-        <dt>Online now</dt>
-        <dd class="visitor-stats__online" data-online-widget>
-          <span data-stats-placeholder aria-label="Loading online count">—</span>
-          <script id="_wauzaki"></script>
-        </dd>
-      </div>
-      <div class="visitor-stats__metric">
-        <dt>Visitors <span class="visitor-stats__abbr">UV</span></dt>
-        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span></dd>
-      </div>
-      <div class="visitor-stats__metric">
-        <dt>Page views <span class="visitor-stats__abbr">PV</span></dt>
-        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span></dd>
-      </div>
-    </dl>
-    <p class="visitor-stats__note">Since 2026-10-29 ·
-      <a href="https://www.vercount.one/" target="_blank" rel="noopener noreferrer">Vercount</a> /
-      <a href="https://whos.amung.us/" target="_blank" rel="noopener noreferrer">whos.amung.us</a>
-      <span data-stats-status role="status"></span>
-    </p>
-    <noscript><p class="visitor-stats__note">Enable JavaScript to view statistics.</p></noscript>
-  </div>
-</section>
-<script defer src="/js/visitor-stats.js"></script>
-
-    
     <main class="site-main">
       <div class="videos-page-shell">
   <header class="page-header">
@@ -103,15 +63,15 @@
         <div class="project-card video-card">
           <div class="video-player-wrap" data-src="//player.bilibili.com/player.html?bvid=BV1H21nBrErb&amp;aid=115494858331627&amp;cid=33709624566&amp;page=1&amp;high_quality=1&amp;danmaku=0">
             
-              <div class="video-cover-overlay" title="Play video" onclick="playVideo(this)">
+              <button type="button" class="video-cover-overlay" title="Play video" aria-label="Play Robot arm kinematics and inverse-kinematics grasping in MuJoCo" onclick="playVideo(this)">
                 <img src="https://i0.hdslb.com/bfs/archive/2328320cf439d9f9f14ce2a2b071c6896e6139b2.jpg" alt="Robot arm kinematics and inverse-kinematics grasping in MuJoCo" referrerpolicy="no-referrer" loading="lazy" />
                 <div class="video-play-btn">
                   <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
                 </div>
-              </div>
+              </button>
             
             <iframe 
-              src="" 
+               
               scrolling="no" 
               border="0" 
               frameborder="no" 
@@ -158,15 +118,15 @@
         <div class="project-card video-card">
           <div class="video-player-wrap" data-src="//player.bilibili.com/player.html?bvid=BV1YfWvzAEDe&amp;aid=115382669023768&amp;cid=33118289946&amp;page=1&amp;high_quality=1&amp;danmaku=0">
             
-              <div class="video-cover-overlay" title="Play video" onclick="playVideo(this)">
+              <button type="button" class="video-cover-overlay" title="Play video" aria-label="Play Robot arm modeling with IKPy and MuJoCo" onclick="playVideo(this)">
                 <img src="https://i1.hdslb.com/bfs/archive/bb7197bd9edaa080fd24f31933b303ed9e0c9cf6.jpg" alt="Robot arm modeling with IKPy and MuJoCo" referrerpolicy="no-referrer" loading="lazy" />
                 <div class="video-play-btn">
                   <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
                 </div>
-              </div>
+              </button>
             
             <iframe 
-              src="" 
+               
               scrolling="no" 
               border="0" 
               frameborder="no" 
@@ -223,6 +183,7 @@ function playVideo(overlay) {
       iframe.setAttribute('src', src + '&autoplay=1');
     }
   }
+  wrap.closest('.video-card').classList.add('is-playing');
   overlay.style.display = 'none';
 }
 </script>
