@@ -1,82 +1,83 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <meta name="theme-color" content="#07111f">
-    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
-    <title>双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图 · Zaki&#39;s Blog</title>
+    <meta name="description" content="Engineering projects and technical notes on robotics, EtherCAT, servo drives, and real-time control.">
+    <title>双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图 · Zaki | Robotics &amp; Control</title>
     <link rel="canonical" href="https://zhuzq2020.github.io/2026/08/10/Dual-Arm-End-Effector-Reachability/">
     <link rel="icon" href="/images/avatar.jpg">
     <link rel="stylesheet" href="/css/zaki.css">
+    <link rel="stylesheet" href="/css/academic.css">
     
     <script>
       (() => {
         const saved = localStorage.getItem('zaki-theme');
         const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        document.documentElement.dataset.theme = saved || preferred;
+        document.documentElement.dataset.theme = saved || 'light';
       })();
     </script>
   <meta name="generator" content="Hexo 7.3.0"></head>
-  <body>
+  <body class="academic-site">
     <div class="page-glow page-glow--one" aria-hidden="true"></div>
     <div class="page-glow page-glow--two" aria-hidden="true"></div>
     <div class="reading-progress" aria-hidden="true"><span></span></div>
     <header class="site-header">
   <div class="header-inner">
-    <a class="wordmark" href="/" aria-label="返回首页">
-      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    <a class="wordmark" href="/" aria-label="Home">
+      <span>ZAKI</span><i>/</i><strong>ROBOTICS</strong>
     </a>
-    <nav class="main-nav" aria-label="主导航">
-      <a class="" href="/">主页</a>
-      <a class="is-active" href="/posts/">文章</a>
-      <a class="" href="/projects/">开源项目</a>
-      <a class="" href="/videos/">视频</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="" href="/">About</a>
+      <a class="is-active" href="/posts/">Writing</a>
+      <a class="" href="/projects/">Projects</a>
+      <a class="" href="/videos/">Videos</a>
     </nav>
     <div class="header-actions">
       
-        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="发邮件联系：zhuzq2020@gmail.com" aria-label="发送邮件">MAIL <span>✉</span></a>
+        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="Email: zhuzq2020@gmail.com" aria-label="Send email">MAIL <span>✉</span></a>
       
-      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
-      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
-      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="Visit Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span aria-hidden="true">◐</span></button>
     </div>
   </div>
 </header>
 
     
-      <section class="visitor-stats-panel visitor-stats-panel--compact" aria-label="网站访问统计">
+      <section class="visitor-stats-panel visitor-stats-panel--compact" aria-label="Site statistics">
   <div class="visitor-stats" data-visitor-stats
        data-hostname="zhuzq2020.github.io"
        data-online-key="fdw1ebicbr">
     <div class="visitor-stats__heading">
       <span class="visitor-stats__dot" aria-hidden="true"></span>
-      <span>SITE / 访问足迹</span>
+      <span>SITE STATISTICS</span>
     </div>
     <dl class="visitor-stats__metrics">
       <div class="visitor-stats__metric">
-        <dt>当前在线</dt>
+        <dt>Online now</dt>
         <dd class="visitor-stats__online" data-online-widget>
-          <span data-stats-placeholder aria-label="在线人数加载中">—</span>
+          <span data-stats-placeholder aria-label="Loading online count">—</span>
           <script id="_wauzaki"></script>
         </dd>
       </div>
       <div class="visitor-stats__metric">
-        <dt>累计访客 <span class="visitor-stats__abbr">UV</span></dt>
-        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span><small>人</small></dd>
+        <dt>Visitors <span class="visitor-stats__abbr">UV</span></dt>
+        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span></dd>
       </div>
       <div class="visitor-stats__metric">
-        <dt>累计浏览 <span class="visitor-stats__abbr">PV</span></dt>
-        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span><small>次</small></dd>
+        <dt>Page views <span class="visitor-stats__abbr">PV</span></dt>
+        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span></dd>
       </div>
     </dl>
-    <p class="visitor-stats__note">统计接入于 2026-10-29 ·
+    <p class="visitor-stats__note">Since 2026-10-29 ·
       <a href="https://www.vercount.one/" target="_blank" rel="noopener noreferrer">Vercount</a> /
       <a href="https://whos.amung.us/" target="_blank" rel="noopener noreferrer">whos.amung.us</a>
       <span data-stats-status role="status"></span>
     </p>
-    <noscript><p class="visitor-stats__note">开启 JavaScript 后可查看访问统计。</p></noscript>
+    <noscript><p class="visitor-stats__note">Enable JavaScript to view statistics.</p></noscript>
   </div>
 </section>
 <script defer src="/js/visitor-stats.js"></script>
@@ -85,16 +86,17 @@
     <main class="site-main">
       <article class="article-shell">
   <header class="article-header">
-    <a class="back-link" href="/posts/">← 返回文章列表</a>
+    <a class="back-link" href="/posts/">← All writing</a>
     <div class="article-kicker">
       <span>TECH NOTE</span>
       <time datetime="2026-08-09T16:00:00.000Z">2026.08.10</time>
     </div>
-    <h1>双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图</h1>
+    <h1 lang="en">Dual-Arm End-Effector Reachability</h1>
+    <p class="article-original-title" lang="zh-CN">双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图</p><p class="article-language-note" lang="en">Written in Chinese · Original technical note</p>
     
     <div class="article-stats">
-      <span>约 7 分钟阅读</span>
-      <span>3491 字</span>
+      <span>7 min read</span>
+      <span>3491 characters</span>
       
         <span># 机器人</span><span># URDF</span><span># 可达空间</span><span># 静力学</span>
       
@@ -298,20 +300,20 @@
 <p>对当前双臂各挂 10 kg 的模型，D6 是最频繁的限制来源，D5 决定部分极端峰值。若要求 D7 预先前倾后，D6 仍能走完整个正向行程，则 D7 从零位开始的连续可用前倾边界约为 11.92°。这类耦合约束正是仅靠单关节限位或几何可达图无法揭示的部分。</p>
 </div>
   </div>
-  <nav class="post-navigation" aria-label="文章导航">
+  <nav class="post-navigation" aria-label="Article navigation">
     
-      <a href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/"><small>上一篇</small><span>← EtherCAT PDO 与 CSP 控制笔记：固定映射、周期插值与反馈链路</span></a>
+      <a href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/"><small>Newer note</small><span>← EtherCAT PDO 与 CSP 控制笔记：固定映射、周期插值与反馈链路</span></a>
     
     
-      <a class="post-navigation__next" href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/"><small>下一篇</small><span>麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记 →</span></a>
+      <a class="post-navigation__next" href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/"><small>Older note</small><span>麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记 →</span></a>
     
   </nav>
 
   
     <section class="comments-section" id="comments">
       <div class="comments-header">
-        <p class="eyebrow"><span></span>INTERACTION / 讨论与互动</p>
-        <h2 class="comments-title">评论与表情点赞</h2>
+        <p class="eyebrow"><span></span>DISCUSSION</p>
+        <h2 class="comments-title">Comments & reactions</h2>
       </div>
       <div class="giscus"></div>
       <script src="https://giscus.app/client.js"

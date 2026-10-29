@@ -1,82 +1,83 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <meta name="theme-color" content="#07111f">
-    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
-    <title>Zaki&#39;s Blog</title>
+    <meta name="description" content="Engineering projects and technical notes on robotics, EtherCAT, servo drives, and real-time control.">
+    <title>Zaki | Robotics &amp; Control</title>
     <link rel="canonical" href="https://zhuzq2020.github.io/posts/index.html">
     <link rel="icon" href="/images/avatar.jpg">
     <link rel="stylesheet" href="/css/zaki.css">
+    <link rel="stylesheet" href="/css/academic.css">
     
     <script>
       (() => {
         const saved = localStorage.getItem('zaki-theme');
         const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        document.documentElement.dataset.theme = saved || preferred;
+        document.documentElement.dataset.theme = saved || 'light';
       })();
     </script>
   <meta name="generator" content="Hexo 7.3.0"></head>
-  <body>
+  <body class="academic-site">
     <div class="page-glow page-glow--one" aria-hidden="true"></div>
     <div class="page-glow page-glow--two" aria-hidden="true"></div>
     <div class="reading-progress" aria-hidden="true"><span></span></div>
     <header class="site-header">
   <div class="header-inner">
-    <a class="wordmark" href="/" aria-label="返回首页">
-      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    <a class="wordmark" href="/" aria-label="Home">
+      <span>ZAKI</span><i>/</i><strong>ROBOTICS</strong>
     </a>
-    <nav class="main-nav" aria-label="主导航">
-      <a class="" href="/">主页</a>
-      <a class="is-active" href="/posts/">文章</a>
-      <a class="" href="/projects/">开源项目</a>
-      <a class="" href="/videos/">视频</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="" href="/">About</a>
+      <a class="is-active" href="/posts/">Writing</a>
+      <a class="" href="/projects/">Projects</a>
+      <a class="" href="/videos/">Videos</a>
     </nav>
     <div class="header-actions">
       
-        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="发邮件联系：zhuzq2020@gmail.com" aria-label="发送邮件">MAIL <span>✉</span></a>
+        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="Email: zhuzq2020@gmail.com" aria-label="Send email">MAIL <span>✉</span></a>
       
-      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
-      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
-      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="Visit Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span aria-hidden="true">◐</span></button>
     </div>
   </div>
 </header>
 
     
-      <section class="visitor-stats-panel visitor-stats-panel--compact" aria-label="网站访问统计">
+      <section class="visitor-stats-panel visitor-stats-panel--compact" aria-label="Site statistics">
   <div class="visitor-stats" data-visitor-stats
        data-hostname="zhuzq2020.github.io"
        data-online-key="fdw1ebicbr">
     <div class="visitor-stats__heading">
       <span class="visitor-stats__dot" aria-hidden="true"></span>
-      <span>SITE / 访问足迹</span>
+      <span>SITE STATISTICS</span>
     </div>
     <dl class="visitor-stats__metrics">
       <div class="visitor-stats__metric">
-        <dt>当前在线</dt>
+        <dt>Online now</dt>
         <dd class="visitor-stats__online" data-online-widget>
-          <span data-stats-placeholder aria-label="在线人数加载中">—</span>
+          <span data-stats-placeholder aria-label="Loading online count">—</span>
           <script id="_wauzaki"></script>
         </dd>
       </div>
       <div class="visitor-stats__metric">
-        <dt>累计访客 <span class="visitor-stats__abbr">UV</span></dt>
-        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span><small>人</small></dd>
+        <dt>Visitors <span class="visitor-stats__abbr">UV</span></dt>
+        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span></dd>
       </div>
       <div class="visitor-stats__metric">
-        <dt>累计浏览 <span class="visitor-stats__abbr">PV</span></dt>
-        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span><small>次</small></dd>
+        <dt>Page views <span class="visitor-stats__abbr">PV</span></dt>
+        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span></dd>
       </div>
     </dl>
-    <p class="visitor-stats__note">统计接入于 2026-10-29 ·
+    <p class="visitor-stats__note">Since 2026-10-29 ·
       <a href="https://www.vercount.one/" target="_blank" rel="noopener noreferrer">Vercount</a> /
       <a href="https://whos.amung.us/" target="_blank" rel="noopener noreferrer">whos.amung.us</a>
       <span data-stats-status role="status"></span>
     </p>
-    <noscript><p class="visitor-stats__note">开启 JavaScript 后可查看访问统计。</p></noscript>
+    <noscript><p class="visitor-stats__note">Enable JavaScript to view statistics.</p></noscript>
   </div>
 </section>
 <script defer src="/js/visitor-stats.js"></script>
@@ -85,7 +86,7 @@
     <main class="site-main">
       <div class="posts-page-shell">
   <div class="posts-page-toolbar">
-    <div class="posts-count-badge">共 11 篇技术笔记</div>
+    <div class="posts-count-badge">11 technical notes</div>
   </div>
 
   <div class="project-grid project-grid--page">
@@ -94,7 +95,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              机器人控制
+              Robot control
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -102,10 +103,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/10/29/Robot-Servo-Drive-and-FOC-Notes/">机器人伺服驱动与 FOC 技术笔记</a>
+          <a href="/2026/10/29/Robot-Servo-Drive-and-FOC-Notes/">Robot Servo Drives and Field-Oriented Control</a>
         </h3>
         
-        <p class="project-card__desc">主题：BLDC&amp;#x2F;PMSM、伺服控制、机器人关节、减速器、FOC、EtherCAT 从站与开发路线整理日期：2026-10-29说明：本笔记整理此前技术讨论，示例参数用于理解原理，不能直接作为产品选型或安全设计依据。 目录 核心概念…</p>
+        <p class="project-card__desc">An overview of servo systems, robot transmissions, FOC, cascaded control loops, and EtherCAT drive development.</p>
         
           <div class="project-card__tags">
             
@@ -120,7 +121,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/10/29/Robot-Servo-Drive-and-FOC-Notes/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/10/29/Robot-Servo-Drive-and-FOC-Notes/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -128,7 +129,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              机器人控制
+              Robot control
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -136,10 +137,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">基于飞特舵机的双臂遥操作系统实践：从关节采集到 WBC 对接</a>
+          <a href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">Building a Dual-Arm Teleoperation Interface with Feetech Servos</a>
         </h3>
         
-        <p class="project-card__desc">做机械臂遥操作，最开始想到的通常是：读取主臂角度，再把角度发给从臂。但真正接入设备后，会发现角度只是这条链路中的一个环节。编码器零点、关节方向、模型限位、采样时序和网络状态，都决定了从臂收到的目标是否可信。 最近，我围绕飞特 STS3215…</p>
+        <p class="project-card__desc">Joint calibration, model mapping, feedback timing, and network integration for a dual-arm leader interface.</p>
         
           <div class="project-card__tags">
             
@@ -154,7 +155,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -162,7 +163,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              工业通信
+              Industrial communication
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -170,10 +171,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/09/14/EtherCAT-IgH-vs-acontis-EC-Master/">EtherCAT主站：IgH EtherCAT Master（V1.6）与 acontis EC-Master (V3.3) 深度对比分析</a>
+          <a href="/2026/09/14/EtherCAT-IgH-vs-acontis-EC-Master/">IgH EtherCAT Master and acontis EC-Master: A Technical Comparison</a>
         </h3>
         
-        <p class="project-card__desc">导读：在工业以太网（EtherCAT）运动控制与自动化系统中，主站（Master）协议栈是整个系统的通信与实时调度核心。本文针对工控界最具代表性的开源方案 IgH EtherCAT Master (V1.6) 与顶级商业方案 acontis…</p>
+        <p class="project-card__desc">A technical comparison of two EtherCAT master implementations for robot control.</p>
         
           <div class="project-card__tags">
             
@@ -188,7 +189,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/09/14/EtherCAT-IgH-vs-acontis-EC-Master/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/09/14/EtherCAT-IgH-vs-acontis-EC-Master/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -196,7 +197,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              工业通信
+              Industrial communication
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -204,10 +205,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">D22 三种 EtherCAT 主站位置与周期抖动对比</a>
+          <a href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">Comparing Position Tracking and Cycle Jitter Across EtherCAT Masters</a>
         </h3>
         
-        <p class="project-card__desc">1. 数据范围本报告对比同一套固定右臂末端轨迹在三种主站下的 D22 数据： 主站 周期日志 样本数 EC-Master cycle_ecmaster_20260908_141617.csv 150,182 SOEM cycle_soem_…</p>
+        <p class="project-card__desc">Measurement notes comparing EC-Master, SOEM, and IgH on motor position tracking and communication timing.</p>
         
           <div class="project-card__tags">
             
@@ -222,7 +223,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -230,7 +231,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              工业通信
+              Industrial communication
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -238,10 +239,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/08/26/EtherCAT-ENI-Generation-And-Customization/">EtherCAT ENI 生成与定制流程：从扫描到 OP 状态验证</a>
+          <a href="/2026/08/26/EtherCAT-ENI-Generation-And-Customization/">Generating and Customizing EtherCAT ENI Files</a>
         </h3>
         
-        <p class="project-card__desc">总体流程12345678910111213扫描实际从站 ↓EC-Engineer 读取 ESI/SII 和默认 PDO ↓在 PDO Mapping 页面修改映射 ↓导出完整 ENI（包含 PDO、SM、FMMU、过程映像和 SDO Ini…</p>
+        <p class="project-card__desc">Engineering notes on EtherCAT network configuration and ENI customization.</p>
         
           <div class="project-card__tags">
             
@@ -256,7 +257,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/08/26/EtherCAT-ENI-Generation-And-Customization/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/08/26/EtherCAT-ENI-Generation-And-Customization/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -264,7 +265,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              工业通信
+              Industrial communication
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -272,10 +273,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/">EtherCAT PDO 与 CSP 控制笔记：固定映射、周期插值与反馈链路</a>
+          <a href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/">EtherCAT PDO and CSP Control: Mapping, Interpolation, and Feedback</a>
         </h3>
         
-        <p class="project-card__desc">1. EtherCAT 通信逻辑 EtherCAT 使用 SM（Sync Manager，同步管理器） 和 FMMU（Fieldbus Memory Management Unit，现场总线内存管理单元）。 一个通信周期只发送一个标准以太网…</p>
+        <p class="project-card__desc">Notes on fixed PDO mappings, cyclic position commands, and the feedback path.</p>
         
           <div class="project-card__tags">
             
@@ -290,7 +291,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/08/25/EtherCAT-PDO-CSP-Control-Notes/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -298,7 +299,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              机器人
+              Robotics
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -306,10 +307,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/08/10/Dual-Arm-End-Effector-Reachability/">双臂机器人末端可触达位置计算：从 URDF 静态重力矩到 557 N·m 约束热力图</a>
+          <a href="/2026/08/10/Dual-Arm-End-Effector-Reachability/">Dual-Arm End-Effector Reachability</a>
         </h3>
         
-        <p class="project-card__desc">机器人的末端在几何上能够到达某个位置，并不意味着它能带着负载稳定到达。关节限位决定了运动学可达空间，电机扭矩又会进一步裁剪这个空间。对于带重载双臂的移动机器人，腰部关节往往是这两类约束交汇的地方。 本文基于修正质量参数后的 bass-00-…</p>
+        <p class="project-card__desc">Notes on evaluating workspace reachability and load-related constraints for dual-arm robots.</p>
         
           <div class="project-card__tags">
             
@@ -324,7 +325,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/08/10/Dual-Arm-End-Effector-Reachability/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/08/10/Dual-Arm-End-Effector-Reachability/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -332,7 +333,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              机器人技术
+              Robotics
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -340,10 +341,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/">麦克纳姆轮 AGV 底盘运动学与整车控制学习笔记</a>
+          <a href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/">Mecanum-Wheel Chassis Kinematics and Control</a>
         </h3>
         
-        <p class="project-card__desc">最近整理了一些关于麦克纳姆轮全向底盘运动学解算、整车控制器架构，以及底盘状态估计的笔记，记录下来备忘。 一、运动学公式与控制框架麦克纳姆轮底盘的核心问题是：给定底盘的期望速度 Vx、Vy、Wz，计算四个轮子各自的目标角速度。 四轮的目标角速…</p>
+        <p class="project-card__desc">Kinematic modeling and motion-control notes for an omnidirectional mobile chassis.</p>
         
           <div class="project-card__tags">
             
@@ -358,7 +359,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/07/24/Mecanum-Wheel-AGV-Chassis-Kinematics-Control/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -366,7 +367,7 @@
         <div class="project-card__top">
           <span class="project-card__badge">
             
-              工业通信
+              Industrial communication
             
           </span>
           <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--faint);">
@@ -374,10 +375,10 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">EtherCAT 与 CANopen/CiA 402 伺服控制入门：从 CoE、SDO/PDO 到状态机</a>
+          <a href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">EtherCAT, CANopen, and CiA 402 Servo Control</a>
         </h3>
         
-        <p class="project-card__desc">在 EtherCAT 伺服系统中，经常会同时遇到 EtherCAT、CoE、CANopen、CiA 402、SDO、PDO、SoE 和 IgH 等名词。它们并不处于同一层：EtherCAT 负责实时以太网通信，CoE 把 CANopen 的…</p>
+        <p class="project-card__desc">An introduction to servo-drive communication, object dictionaries, and device state handling.</p>
         
           <div class="project-card__tags">
             
@@ -392,7 +393,7 @@
           </div>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">Read note (Chinese) →</a>
         </div>
       </div>
     
@@ -408,20 +409,20 @@
           </span>
         </div>
         <h3 class="project-card__title">
-          <a href="/2025/08/12/KMPAlgorithm/">KMP算法详解</a>
+          <a href="/2025/08/12/KMPAlgorithm/">Understanding the Knuth–Morris–Pratt Algorithm</a>
         </h3>
         
-        <p class="project-card__desc">为什么使用KMP解决问题：在主串“SSSSSSSSSSSSSSSSSSSSSSSA”中查找”SSB”，比较到最后一个才知道不匹配，然后回溯，效率低。 KMP优势分析子串n本身的特点（生成next数组），在主串m查找子串的时候，不需要重头遍历…</p>
+        <p class="project-card__desc">Notes on string matching and the prefix-based KMP algorithm.</p>
         
         <div class="project-card__actions">
-          <a class="project-btn project-btn--primary" href="/2025/08/12/KMPAlgorithm/">阅读全文 →</a>
+          <a class="project-btn project-btn--primary" href="/2025/08/12/KMPAlgorithm/">Read note (Chinese) →</a>
         </div>
       </div>
     
   </div>
   
-    <nav class="pagination" aria-label="分页">
-      <span class="page-number current">1</span><a class="page-number" href="/posts/page/2/">2</a><a class="extend next" rel="next" href="/posts/page/2/">下一页 →</a>
+    <nav class="pagination" aria-label="Pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/posts/page/2/">2</a><a class="extend next" rel="next" href="/posts/page/2/">Next →</a>
     </nav>
   
 </div>

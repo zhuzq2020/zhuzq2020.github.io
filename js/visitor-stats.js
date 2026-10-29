@@ -5,7 +5,7 @@
   const status = stats.querySelector('[data-stats-status]');
   // 本地预览不计入生产站点，所有页面共用同一站点标识。
   if (location.hostname !== stats.dataset.hostname) {
-    status.textContent = ' · 本地预览不计数';
+    status.textContent = ' · Preview is not counted';
     return;
   }
 
@@ -22,7 +22,7 @@
     if (hasOnline && totalsLoaded()) {
       status.textContent = '';
     } else if (timedOut) {
-      status.textContent = ' · 部分统计暂不可用';
+      status.textContent = ' · Some statistics are unavailable';
     }
   };
   new MutationObserver(update).observe(stats.querySelector('dl'), { childList: true, subtree: true, characterData: true });

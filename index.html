@@ -1,220 +1,162 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <meta name="theme-color" content="#07111f">
-    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
-    <title>主页 · Zaki&#39;s Blog</title>
+    <meta name="description" content="Engineering projects and technical notes on robotics, EtherCAT, servo drives, and real-time control.">
+    <title>About · Zaki | Robotics &amp; Control</title>
     <link rel="canonical" href="https://zhuzq2020.github.io/index.html">
     <link rel="icon" href="/images/avatar.jpg">
     <link rel="stylesheet" href="/css/zaki.css">
+    <link rel="stylesheet" href="/css/academic.css">
     
     <script>
       (() => {
         const saved = localStorage.getItem('zaki-theme');
         const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        document.documentElement.dataset.theme = saved || preferred;
+        document.documentElement.dataset.theme = saved || 'light';
       })();
     </script>
   <meta name="generator" content="Hexo 7.3.0"></head>
-  <body>
+  <body class="academic-site">
     <div class="page-glow page-glow--one" aria-hidden="true"></div>
     <div class="page-glow page-glow--two" aria-hidden="true"></div>
     <div class="reading-progress" aria-hidden="true"><span></span></div>
     <header class="site-header">
   <div class="header-inner">
-    <a class="wordmark" href="/" aria-label="返回首页">
-      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    <a class="wordmark" href="/" aria-label="Home">
+      <span>ZAKI</span><i>/</i><strong>ROBOTICS</strong>
     </a>
-    <nav class="main-nav" aria-label="主导航">
-      <a class="is-active" href="/">主页</a>
-      <a class="" href="/posts/">文章</a>
-      <a class="" href="/projects/">开源项目</a>
-      <a class="" href="/videos/">视频</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="is-active" href="/">About</a>
+      <a class="" href="/posts/">Writing</a>
+      <a class="" href="/projects/">Projects</a>
+      <a class="" href="/videos/">Videos</a>
     </nav>
     <div class="header-actions">
       
-        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="发邮件联系：zhuzq2020@gmail.com" aria-label="发送邮件">MAIL <span>✉</span></a>
+        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="Email: zhuzq2020@gmail.com" aria-label="Send email">MAIL <span>✉</span></a>
       
-      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
-      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
-      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="Visit Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span aria-hidden="true">◐</span></button>
     </div>
   </div>
 </header>
 
     
     <main class="site-main">
-      <div class="home-shell home-shell--about">
-  <section class="intro-panel intro-panel--home" aria-labelledby="intro-title">
-    <div class="home-about home-readme">
-      <h1 id="intro-title" class="readme-title">Hi there, I'm Zaki (zhuzq2020) 👋</h1>
-
-      <blockquote class="readme-quote">
-        <p><strong>Robotics & Industrial Bus Software Engineer</strong> | 专注于工业总线、具身智能整机系统与机器人运动控制</p>
-      </blockquote>
-
-      <div class="readme-badges">
-        <a href="https://zhuzq2020.github.io"><img src="https://img.shields.io/badge/My_Blog-zhuzq2020.github.io-blue?style=flat-square&logo=hexo&logoColor=white" alt="Blog" /></a>
-        <a href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/GitHub-zhuzq2020-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub" /></a>
-        <img src="https://img.shields.io/github/followers/zhuzq2020?style=flat-square&color=2ea44f" alt="Followers" />
-        <img src="https://img.shields.io/badge/Total_Repos-14-blue?style=flat-square" alt="Repositories" />
+      <div class="academic-home">
+  <div class="academic-main">
+    <section class="academic-section academic-biography" id="about" aria-labelledby="about-heading">
+      <p class="academic-kicker">ROBOTICS · REAL-TIME SYSTEMS · MOTION CONTROL</p>
+      <h1 id="about-heading">About me</h1>
+      <p class="academic-intro">I am Zaki, a robotics software engineer working on the systems that connect robot motion to real hardware.</p>
+      <p>My work focuses on EtherCAT communication, servo integration, real-time Linux, and multi-joint robot control. I build tools for diagnosing drives, inspecting timing behavior, and bringing motion-control software onto physical robots.</p>
+      <p>This website brings together my engineering projects, experiments, and technical notes. I am particularly interested in reliable hardware interfaces, robot teleoperation, and the relationship between control algorithms and measured system behavior.</p>
+      <div class="academic-about-columns">
+        <div><h2>Interests</h2><ul><li>Robot manipulation and teleoperation</li><li>Servo drives and industrial communication</li><li>Real-time control and system diagnostics</li></ul></div>
+        <div><h2>Technical background</h2><ul><li>C / C++ and Python</li><li>EtherCAT · SOEM · IgH · CiA 402</li><li>ROS 2 · MuJoCo · Linux</li></ul></div>
       </div>
+    </section>
 
-      <hr class="readme-divider" />
+    <section class="academic-section" id="projects" aria-labelledby="projects-heading">
+      <div class="academic-section-heading"><h2 id="projects-heading">Selected projects</h2><a href="/projects/">All projects →</a></div>
+      <article class="academic-project">
+        <p class="academic-project-type">ROBOT TELEOPERATION</p>
+        <h3><a href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">Dual-arm teleoperation with Feetech servos</a></h3>
+        <p>A leader-arm interface with joint calibration, MuJoCo model mapping, and a TCP bridge to a whole-body control system. The project explores feedback freshness, alignment, and communication fault handling.</p>
+        <div class="academic-project-links"><a href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">Technical note <span lang="zh-CN">中文</span> ↗</a><span>Python · MuJoCo · WBC</span></div>
+      </article>
+      
+        <article class="academic-project">
+          <p class="academic-project-type">OPEN SOURCE / C++</p>
+          <h3><a href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer">EtherCAT_CiA402_Monitor</a></h3>
+          <p>A SOEM-based diagnostic tool for EtherCAT servo drives, with CoE / SDO inspection, multi-device monitoring, and CiA 402 state diagnostics.</p>
+          <div class="academic-project-links"><a href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer">Code ↗</a><a href="/2026/07/22/EtherCAT-CANopen-CiA402-Servo-Control/">Technical note <span lang="zh-CN">中文</span> ↗</a></div>
+        </article>
+      
+        <article class="academic-project">
+          <p class="academic-project-type">OPEN SOURCE / PYTHON</p>
+          <h3><a href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer">motor_jitter_viewer</a></h3>
+          <p>A measurement and visualization tool for comparing motor position tracking and cycle timing across EC-Master, SOEM, and IgH EtherCAT masters.</p>
+          <div class="academic-project-links"><a href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer">Code ↗</a><a href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">Technical note <span lang="zh-CN">中文</span> ↗</a></div>
+        </article>
+      
+    </section>
 
-      <h3 class="readme-heading">🛠️ 技能图谱与技术栈 (Tech Stack)</h3>
-
-      <h4 class="readme-subheading">编程语言 (Languages)</h4>
-      <div class="badge-group">
-        <img src="https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white" alt="C++" />
-        <img src="https://img.shields.io/badge/C-A8B9CC?style=for-the-badge&logo=c&logoColor=white" alt="C" />
-        <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+    <section class="academic-section" id="writing" aria-labelledby="writing-heading">
+      <div class="academic-section-heading"><h2 id="writing-heading">Recent writing</h2><a href="/posts/">All notes →</a></div>
+      <p class="academic-section-note">Project summaries are in English; the technical notes retain their original Chinese text.</p>
+      <div class="academic-writing-list">
+      
+        <article><time datetime="2026-10-29T06:57:01.000Z">2026-10-29</time><div><h3><a href="/2026/10/29/Robot-Servo-Drive-and-FOC-Notes/">Robot Servo Drives and Field-Oriented Control</a></h3><span class="academic-language">Chinese · Technical note</span></div></article>
+      
+        <article><time datetime="2026-10-29T03:25:17.000Z">2026-10-29</time><div><h3><a href="/2026/10/29/Feetech-Dual-Arm-Teleoperation/">Building a Dual-Arm Teleoperation Interface with Feetech Servos</a></h3><span class="academic-language">Chinese · Technical note</span></div></article>
+      
+        <article><time datetime="2026-09-14T02:30:00.000Z">2026-09-14</time><div><h3><a href="/2026/09/14/EtherCAT-IgH-vs-acontis-EC-Master/">IgH EtherCAT Master and acontis EC-Master: A Technical Comparison</a></h3><span class="academic-language">Chinese · Technical note</span></div></article>
+      
+        <article><time datetime="2026-09-08T07:00:32.000Z">2026-09-08</time><div><h3><a href="/2026/09/08/EtherCAT-Master-Jitter-Comparison/">Comparing Position Tracking and Cycle Jitter Across EtherCAT Masters</a></h3><span class="academic-language">Chinese · Technical note</span></div></article>
+      
       </div>
+    </section>
 
-      <h4 class="readme-subheading">工业通信与运动控制 (Industrial Bus & Motion Control)</h4>
-      <div class="badge-group">
-        <img src="https://img.shields.io/badge/EtherCAT-CiA402%20%7C%20SOEM%20%7C%20IgH-008080?style=for-the-badge" alt="EtherCAT" />
-        <img src="https://img.shields.io/badge/TwinCAT%203-Beckhoff%20PLC-003366?style=for-the-badge" alt="TwinCAT 3" />
-        <img src="https://img.shields.io/badge/Motion%20Control-Multi--Axis%20Trajectory-2b5797?style=for-the-badge" alt="Motion Control" />
-        <img src="https://img.shields.io/badge/Motor%20Drivers-DRV8461%20%7C%20Steppers%20%7C%20Servos-5c2d91?style=for-the-badge" alt="Motor Drivers" />
-      </div>
+    <section class="academic-section" id="demonstrations" aria-labelledby="demos-heading">
+      <div class="academic-section-heading"><h2 id="demos-heading">Demonstrations</h2><a href="/videos/">Watch videos →</a></div>
+      
+        <article class="academic-demo"><h3><a href="https://www.bilibili.com/video/BV1H21nBrErb" target="_blank" rel="noopener noreferrer">Robot arm kinematics and inverse-kinematics grasping in MuJoCo ↗</a></h3><p>Inverse kinematics and smooth motion planning for a robot arm reaching a target pose in simulation.</p></article>
+      
+        <article class="academic-demo"><h3><a href="https://www.bilibili.com/video/BV1YfWvzAEDe" target="_blank" rel="noopener noreferrer">Robot arm modeling with IKPy and MuJoCo ↗</a></h3><p>Building a robot model, setting up the simulation, and solving inverse kinematics to move the end effector to a target position.</p></article>
+      
+    </section>
+    <section class="academic-section academic-contact" id="contact"><h2>Contact</h2><p>For questions about my projects or robotics engineering, reach me at <a href="mailto:zhuzq2020@gmail.com">zhuzq2020@gmail.com</a>.</p></section>
+  </div>
 
-      <h4 class="readme-subheading">机器人与具身智能 (Robotics & Embodied AI)</h4>
-      <div class="badge-group">
-        <img src="https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy-22314E?style=for-the-badge&logo=ros&logoColor=white" alt="ROS 2" />
-        <img src="https://img.shields.io/badge/NVIDIA-Jetson%20AGX%20Orin-76B900?style=for-the-badge&logo=nvidia&logoColor=white" alt="NVIDIA Jetson" />
-        <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV" />
-        <img src="https://img.shields.io/badge/Sensors-Livox%20MID--360%20%7C%20Gemini%20335L-E95420?style=for-the-badge" alt="Sensors" />
-      </div>
-
-      <h4 class="readme-subheading">界面开发与嵌入式系统 (GUI & Embedded Systems)</h4>
-      <div class="badge-group">
-        <img src="https://img.shields.io/badge/Qt-6%20Widgets%20%7C%20QML-41CD52?style=for-the-badge&logo=qt&logoColor=white" alt="Qt 6" />
-        <img src="https://img.shields.io/badge/ESP32-WROOM32%20%7C%20FreeRTOS-E7352C?style=for-the-badge&logo=espressif&logoColor=white" alt="ESP32" />
-        <img src="https://img.shields.io/badge/Linux-Ubuntu%20RT%20Preempt-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux RT" />
-        <img src="https://img.shields.io/badge/CAD-SolidWorks%203D-ff5722?style=for-the-badge" alt="CAD" />
-      </div>
-
-      <hr class="readme-divider" />
-
-      <h3 class="readme-heading">🚀 核心项目矩阵 (Core Project Matrix)</h3>
-
-      <div class="readme-table-wrap">
-        <table class="readme-table">
-          <thead>
-            <tr>
-              <th>领域</th>
-              <th>核心项目 / 成果</th>
-              <th>技术栈</th>
-              <th>亮点特色</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>工业总线测试</strong></td>
-              <td><a href="https://github.com/zhuzq2020/motor_jitter_viewer" target="_blank" rel="noopener noreferrer"><code>motor_jitter_viewer</code></a></td>
-              <td>Python, Matplotlib</td>
-              <td>跨主站（EC-Master / SOEM / IgH）电机位置跟踪曲线与 EtherCAT 通信周期抖动多维度对比分析</td>
-            </tr>
-            <tr>
-              <td><strong>工业诊断监控</strong></td>
-              <td><a href="https://github.com/zhuzq2020/EtherCAT_CiA402_Monitor" target="_blank" rel="noopener noreferrer"><code>EtherCAT_CiA402_Monitor</code></a></td>
-              <td>C++, SOEM, CoE/SDO</td>
-              <td>基于 SOEM 的通用 EtherCAT CiA402 状态诊断器，支持从站标准字典只读在线监控与周期扫描</td>
-            </tr>
-            <tr>
-              <td><strong>具身整机调度</strong></td>
-              <td><code>robot_manager</code></td>
-              <td>C++, ROS 2, PCL</td>
-              <td>机器人整机系统调度管理器，集成 Livox MID-360 激光雷达、Gemini 335L 深度相机、双工语音交互与多节点容灾</td>
-            </tr>
-            <tr>
-              <td><strong>机械臂运控</strong></td>
-              <td><code>soem_robot_arm</code></td>
-              <td>C, SOEM, EtherCAT</td>
-              <td>基于 SOEM 的 7 自由度工业机械臂总线运控工程，支持 7 轴闭环联动、轨迹生成与 PDO 映射规整化</td>
-            </tr>
-            <tr>
-              <td><strong>四足机器人</strong></td>
-              <td><code>RobotDog</code></td>
-              <td>ESP32, Qt 6, SolidWorks</td>
-              <td>20路舵机四足机器狗全栈工程，包含 WiFi TCP 上位机控制协议、底层步态驱动与 3D 机械结构设计</td>
-            </tr>
-            <tr>
-              <td><strong>技术知识库</strong></td>
-              <td><a href="/posts/"><code>zhuzq2020.github.io</code></a></td>
-              <td>Hexo, Markdown</td>
-              <td>记录工业通信、EtherCAT 踩坑实录、机器人运动学算法及嵌入式底层开发经验的个人技术博客</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <hr class="readme-divider" />
-
-      <p class="readme-quote-footer">
-        <em>"Talk is cheap, show me the code."</em>
-      </p>
-
-      <div class="home-actions">
-        <a class="home-btn home-btn--primary" href="/posts/">浏览技术笔记 <span>→</span></a>
-        <a class="home-btn home-btn--secondary" href="/projects/">探索开源项目 <span>↗</span></a>
-        <a class="home-btn home-btn--ghost" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer">GitHub 个人主页 <span>↗</span></a>
-      </div>
-    </div>
-
-    <div class="home-sidebar">
-    <aside class="profile-card">
-      <div class="profile-card__topline"><span>PROFILE</span><span>01</span></div>
-      <img class="profile-avatar" src="/images/avatar.jpg" alt="宅总 zaki 的头像" width="168" height="168">
-      <div class="profile-card__body">
-        <p class="profile-status"><span class="status-indicator"></span>ONLINE / OP MODE</p>
-        <h2>宅总 zaki</h2>
-        <p>把复杂的问题拆开、验证，再写成清晰可复用的笔记。</p>
-      </div>
-    </aside>
-    
-      <section class="visitor-stats-panel visitor-stats-panel--card" aria-label="网站访问统计">
+  <aside class="academic-sidebar" aria-label="Profile">
+    <section class="academic-profile">
+      <img src="/images/avatar.jpg" alt="Zaki" width="160" height="160">
+      <h2>Zaki</h2><p class="academic-role">Robotics Software Engineer</p><p class="academic-affiliation">Real-time systems & motion control</p>
+      <div class="academic-profile-links"><a href="mailto:zhuzq2020@gmail.com">Email</a><a href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer">Bilibili ↗</a></div>
+    </section>
+    <section class="visitor-stats-panel visitor-stats-panel--card" aria-label="Site statistics">
   <div class="visitor-stats" data-visitor-stats
        data-hostname="zhuzq2020.github.io"
        data-online-key="fdw1ebicbr">
     <div class="visitor-stats__heading">
       <span class="visitor-stats__dot" aria-hidden="true"></span>
-      <span>SITE / 访问足迹</span>
+      <span>SITE STATISTICS</span>
     </div>
     <dl class="visitor-stats__metrics">
       <div class="visitor-stats__metric">
-        <dt>当前在线</dt>
+        <dt>Online now</dt>
         <dd class="visitor-stats__online" data-online-widget>
-          <span data-stats-placeholder aria-label="在线人数加载中">—</span>
+          <span data-stats-placeholder aria-label="Loading online count">—</span>
           <script id="_wauzaki"></script>
         </dd>
       </div>
       <div class="visitor-stats__metric">
-        <dt>累计访客 <span class="visitor-stats__abbr">UV</span></dt>
-        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span><small>人</small></dd>
+        <dt>Visitors <span class="visitor-stats__abbr">UV</span></dt>
+        <dd><span id="vercount_value_site_uv" data-stats-placeholder>—</span></dd>
       </div>
       <div class="visitor-stats__metric">
-        <dt>累计浏览 <span class="visitor-stats__abbr">PV</span></dt>
-        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span><small>次</small></dd>
+        <dt>Page views <span class="visitor-stats__abbr">PV</span></dt>
+        <dd><span id="vercount_value_site_pv" data-stats-placeholder>—</span></dd>
       </div>
     </dl>
-    <p class="visitor-stats__note">统计接入于 2026-10-29 ·
+    <p class="visitor-stats__note">Since 2026-10-29 ·
       <a href="https://www.vercount.one/" target="_blank" rel="noopener noreferrer">Vercount</a> /
       <a href="https://whos.amung.us/" target="_blank" rel="noopener noreferrer">whos.amung.us</a>
       <span data-stats-status role="status"></span>
     </p>
-    <noscript><p class="visitor-stats__note">开启 JavaScript 后可查看访问统计。</p></noscript>
+    <noscript><p class="visitor-stats__note">Enable JavaScript to view statistics.</p></noscript>
   </div>
 </section>
 <script defer src="/js/visitor-stats.js"></script>
 
-    
-    </div>
-  </section>
+    <p class="academic-sidebar-note">Engineering notes from implementation, simulation, and hardware testing.</p>
+  </aside>
 </div>
 
     </main>
