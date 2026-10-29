@@ -1666,6 +1666,16 @@ a:focus-visible {
   background: var(--line-strong);
 }
 
+.prose .article-equation {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 8px 2px;
+  margin: 1.5em 0;
+}
+
+.prose .article-equation .katex-display { margin: 0; }
+.prose h2[id], .prose h3[id] { scroll-margin-top: 100px; }
+
 .post-navigation {
   display: grid;
   grid-template-columns: 1fr 1fr;
