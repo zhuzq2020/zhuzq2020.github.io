@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="宅总 zaki 的个人技术博客，记录代码、机器人与实践笔记。">
+    <title>基于飞特舵机的双臂遥操作系统实践：从关节采集到 WBC 对接 · Zaki&#39;s Blog</title>
+    <link rel="canonical" href="https://zhuzq2020.github.io/2026/10/29/Feetech-Dual-Arm-Teleoperation/">
+    <link rel="icon" href="/images/avatar.jpg">
+    <link rel="stylesheet" href="/css/zaki.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('zaki-theme');
+        const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  <meta name="generator" content="Hexo 7.3.0"></head>
+  <body>
+    <div class="page-glow page-glow--one" aria-hidden="true"></div>
+    <div class="page-glow page-glow--two" aria-hidden="true"></div>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="返回首页">
+      <span>ZAKI</span><i>/</i><strong>LAB NOTES</strong>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="" href="/">主页</a>
+      <a class="is-active" href="/posts/">文章</a>
+      <a class="" href="/projects/">开源项目</a>
+      <a class="" href="/videos/">视频</a>
+    </nav>
+    <div class="header-actions">
+      
+        <a class="social-link social-link--mail" href="mailto:zhuzq2020@gmail.com" title="发邮件联系：zhuzq2020@gmail.com" aria-label="发送邮件">MAIL <span>✉</span></a>
+      
+      <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GH <span>↗</span></a>
+      <a class="social-link social-link--bilibili" href="https://space.bilibili.com/15385575" target="_blank" rel="noopener noreferrer" aria-label="访问 Bilibili">BILI <span>↗</span></a>
+      <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+    </div>
+  </div>
+</header>
+
+    <main class="site-main">
+      <article class="article-shell">
+  <header class="article-header">
+    <a class="back-link" href="/posts/">← 返回文章列表</a>
+    <div class="article-kicker">
+      <span>TECH NOTE</span>
+      <time datetime="2026-10-29T03:25:17.000Z">2026.10.29</time>
+    </div>
+    <h1>基于飞特舵机的双臂遥操作系统实践：从关节采集到 WBC 对接</h1>
+    
+    <div class="article-stats">
+      <span>约 11 分钟阅读</span>
+      <span>5059 字</span>
+      
+        <span># 机器人</span><span># 遥操作</span><span># 飞特舵机</span><span># MuJoCo</span><span># WBC</span>
+      
+    </div>
+  </header>
+  <div class="article-grid">
+    <aside class="article-rail" aria-hidden="true">
+      <span>READING</span>
+      <i></i>
+      <b>Z / 26</b>
+    </aside>
+    <div class="prose"><p>做机械臂遥操作，最开始想到的通常是：读取主臂角度，再把角度发给从臂。但真正接入设备后，会发现角度只是这条链路中的一个环节。编码器零点、关节方向、模型限位、采样时序和网络状态，都决定了从臂收到的目标是否可信。</p>
+<p>最近，我围绕飞特 STS3215-C046 舵机搭建了一套双臂遥操作控制程序。主臂每侧使用八个舵机，其中七个映射到机械臂关节，第八个作为夹爪输入；上位机负责串口采集、模型映射和网络传输，WBC 端负责接收目标并连接从臂控制系统。</p>
+<p>这篇文章记录其中值得复用的设计和调试经验。内容集中在终端控制、模型标定与网络遥操作，当前仍有串口稳定性和实机跟随效果需要继续验证。</p>
+<h2 id="1-先明确系统中各部分的职责"><a href="#1-先明确系统中各部分的职责" class="headerlink" title="1. 先明确系统中各部分的职责"></a>1. 先明确系统中各部分的职责</h2><p>主臂是操作者用手推动的输入设备，从臂是执行运动的机器人手臂。两者的机械尺寸、零位和允许运动范围可以不同，因此需要在中间建立明确的角度映射。</p>
+<p>系统的数据流如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">左侧主臂：8 个飞特舵机 ── 独立串口 ── 左臂采集线程 ──┐</span><br><span class="line">                                                       │</span><br><span class="line">                                                       ├─ 状态快照</span><br><span class="line">                                                       │      │</span><br><span class="line">右侧主臂：8 个飞特舵机 ── 独立串口 ── 右臂采集线程 ──┘      ├─ MuJoCo 姿态显示</span><br><span class="line">                                                              │</span><br><span class="line">                                                              └─ 网络客户端</span><br><span class="line">                                                                      │</span><br><span class="line">                                                               TCP JSON-lines</span><br><span class="line">                                                                      │</span><br><span class="line">                                                                 WBC 桥接</span><br><span class="line">                                                                      │</span><br><span class="line">                                                           关节目标 / 夹爪动作</span><br><span class="line">                                                                      │</span><br><span class="line">                                                                 从臂控制器</span><br></pre></td></tr></table></figure>
+
+<p>主臂侧使用 Python，底层封装飞特官方 FTServo Python SDK。WBC 桥接部署在机器人控制侧，主臂电脑不需要安装完整的 ROS 环境。虽然程序入口名为 <code>wifi</code>，传输使用的是 TCP，有线网络同样适用。</p>
+<p>这个分工让主臂采集和机器人控制可以分别调试：先确认主臂反馈与模型一致，再接入网络，最后验证从臂执行。</p>
+<h2 id="2-双臂使用两条独立总线"><a href="#2-双臂使用两条独立总线" class="headerlink" title="2. 双臂使用两条独立总线"></a>2. 双臂使用两条独立总线</h2><p>每侧串口连接 ID 1–8，波特率为 1 Mbps。左右总线互相独立，因此两侧可以使用相同的一组舵机 ID。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>当前设计</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>舵机</td>
+<td>STS3215-C046，单圈位置模式</td>
+</tr>
+<tr>
+<td>每侧数量</td>
+<td>8 个</td>
+</tr>
+<tr>
+<td>机械臂映射</td>
+<td>ID 1–7</td>
+</tr>
+<tr>
+<td>夹爪输入</td>
+<td>ID 8</td>
+</tr>
+<tr>
+<td>编码器周期</td>
+<td>4096 刻度</td>
+</tr>
+<tr>
+<td>串口目标采样率</td>
+<td>30 Hz</td>
+</tr>
+<tr>
+<td>串口分配</td>
+<td>每侧独立设备、独立工作线程</td>
+</tr>
+</tbody></table>
+<p>左右设备通过 <code>/dev/serial/by-id/</code> 固定绑定，避免重启或重新插拔后 <code>ttyUSB0</code>、<code>ttyUSB1</code> 编号交换。固定标识跟随 USB 转串口设备，所以线缆与实际左右臂的对应关系仍需要在现场确认。</p>
+<p>另一个重要约束是串口所有权。运行期间，每条串口由对应的工作线程统一读写，终端命令和网络请求通过队列提交。这样可以避免多个线程交叉收发，破坏“请求—应答”的对应关系。</p>
+<h2 id="3-把舵机刻度转换为模型角度"><a href="#3-把舵机刻度转换为模型角度" class="headerlink" title="3. 把舵机刻度转换为模型角度"></a>3. 把舵机刻度转换为模型角度</h2><p>STS3215 的单圈位置范围为 0–4095。项目采用 2048 作为硬件中位，对应的基本角度换算为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">q = direction × (raw − 2048) × 2π / 4096 + offset</span><br></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<ul>
+<li><code>raw</code> 是舵机实际反馈刻度。</li>
+<li><code>direction</code> 为 +1 或 −1，描述编码器增加方向与模型正方向的关系。</li>
+<li><code>offset</code> 是当前模型的角度偏移，公式中采用弧度。</li>
+<li><code>q</code> 是映射后的模型关节角，单位为弧度。</li>
+</ul>
+<p>例如，<code>raw=2304</code>，相比中位增加了 256 刻度，对应输出轴转角为 22.5°。若方向为 +1，而这一个实体姿态需要对应模型的 0°，就应设置 −22.5° 的模型偏移。</p>
+<p>这里容易出现一个错误：<strong>把输出轴角度再除以舵机内部减速比。</strong> 当前编码器反馈按输出轴每圈 4096 刻度使用，换算时不再除以 147。</p>
+<p>跨越 4095→0 时，还需要结合模型关节范围选择等价角度，避免显示突然跳一整圈。项目利用编码器周期和模型限位处理这一问题；这种方法依赖关节范围能够消除歧义，不能直接推广到任意多圈关节。</p>
+<h2 id="4-硬件标零与模型标定分开处理"><a href="#4-硬件标零与模型标定分开处理" class="headerlink" title="4. 硬件标零与模型标定分开处理"></a>4. 硬件标零与模型标定分开处理</h2><p>同一套主臂要适配同川和珞石模型，不能每切换一次模型就重新写舵机零点。我将标定分成了三个层次。</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>调整内容</th>
+<th>影响范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>硬件标零</td>
+<td>修改舵机 EEPROM 偏移，将参考位置设为中位</td>
+<td>使用该实体舵机的所有模型</td>
+</tr>
+<tr>
+<td>方向配置</td>
+<td>设置反馈到模型的正负方向</td>
+<td>当前模型配置</td>
+</tr>
+<tr>
+<td>模型偏移</td>
+<td>将某个实体参考姿态对应到已知模型角度</td>
+<td>当前模型配置</td>
+</tr>
+</tbody></table>
+<p>硬件标零用于确定实体设备的基准，模型偏移用于适配不同机器人的参考姿态。切换模型时，优先调整后两项。</p>
+<p>下面是终端中的软件标定示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 在实体有支撑的条件下关闭左臂扭矩</span><br><span class="line">left torque 0</span><br><span class="line"></span><br><span class="line"># 手动摆到已知参考姿态后，将关节 1 当前位置对应为模型 0°</span><br><span class="line">left align 1 0</span><br><span class="line"></span><br><span class="line"># 多关节参考角度标定，单位为度</span><br><span class="line">left align 1=0 2=-90</span><br><span class="line"></span><br><span class="line"># 查看偏移与实际反馈</span><br><span class="line">left offset</span><br><span class="line">status</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>align</code> 计算并保存模型偏移，不发送运动目标，也不写 EEPROM。它要求反馈新鲜、相关关节反馈完整，且参考角度在模型范围内。</p>
+<p>只有实体姿态确实对应模型全零时，才适合使用 <code>align all</code>。零位标定准确、关节方向一致，也只能说明关节映射成立；不同尺寸机械臂的末端轨迹仍可能不同。</p>
+<h2 id="5-用-MuJoCo-检查映射结果"><a href="#5-用-MuJoCo-检查映射结果" class="headerlink" title="5. 用 MuJoCo 检查映射结果"></a>5. 用 MuJoCo 检查映射结果</h2><p>项目保留了真实网格和关节结构，并提供同川、珞石等模型配置。实体反馈到来后，将映射后的角度写入 MuJoCo 的 <code>qpos</code>，再调用 <code>mj_forward</code> 更新姿态。</p>
+<p>这一过程用于观察实际关节反馈在模型中的表现，不进行电机动力学预测。</p>
+<p>调试时，我先保持主臂卸力，逐个关节手推，检查三个问题：</p>
+<ol>
+<li>动的是不是预期关节，左右臂有没有接反。</li>
+<li>模型旋转方向是否与实体一致。</li>
+<li>参考姿态和限位附近的显示是否合理。</li>
+</ol>
+<p>模型能把配置错误直观地暴露出来。例如，一个关节方向写反，可能在小角度时不明显，但逐轴手推后就容易发现。实际反馈超过模型范围时仍照实显示，不能将反馈截断成一个看似正常的姿态。</p>
+<p>模型预览和无窗口控制也分开提供：前者完全离线，后者仍连接实体并执行反馈采集，只是不打开查看器。</p>
+<h2 id="6-终端控制：同步写解决了什么"><a href="#6-终端控制：同步写解决了什么" class="headerlink" title="6. 终端控制：同步写解决了什么"></a>6. 终端控制：同步写解决了什么</h2><p>程序同时提供原始刻度和模型角度两类命令。下面只展示语法，目标值需要结合实际姿态与限位确定：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 原始刻度目标</span><br><span class="line">left move 1=2048 3=2200</span><br><span class="line"></span><br><span class="line"># 模型角度目标，单位为度</span><br><span class="line">right angle 1=30 3=-20 6=10</span><br><span class="line"></span><br><span class="line"># 双臂多轴目标</span><br><span class="line">both angle left 1=30 3=-20 right 2=10 6=-10</span><br></pre></td></tr></table></figure>
+
+<p>同一串口的多轴位置目标通过 SDK 同步写组包，一帧包含多个 ID 的目标。未指定的轴不补发旧目标，任一目标非法时整批拒绝。</p>
+<p>双臂命令会先统一校验两侧目标、连接、扭矩状态和队列容量，再提交给两个串口线程。但左右臂最终仍在不同总线上分别发包，因此这里没有跨串口硬件同步触发，也不能保证机械上严格同时起动或到达。</p>
+<p>同步写广播没有逐舵机应答。发包成功之后，还需要通过实际位置反馈确认执行情况。项目另有单舵机普通写入口，可以等待该 ID 的应答，但应答成功同样不代表机械轴已经到位。</p>
+<h2 id="7-30-Hz：区分采样、发送和执行"><a href="#7-30-Hz：区分采样、发送和执行" class="headerlink" title="7. 30 Hz：区分采样、发送和执行"></a>7. 30 Hz：区分采样、发送和执行</h2><p>项目的串口目标采样率为 30 Hz，约每 33.3 ms 读取一轮。但“系统是 30 Hz”这个表述不够准确，至少需要区分四个环节。</p>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>串口采样</td>
+<td>完成一轮舵机位置读取</td>
+</tr>
+<tr>
+<td>网络发送</td>
+<td>将最新状态快照传给 WBC 桥接</td>
+</tr>
+<tr>
+<td>桥接输出</td>
+<td>将有效目标交给 WBC</td>
+</tr>
+<tr>
+<td>从臂执行</td>
+<td>控制器实际消费目标并驱动机器人</td>
+</tr>
+</tbody></table>
+<p>串口线程逐个读取舵机，因此一轮八轴反馈不是同一时刻采集的。当前 <code>status</code> 中的位置反馈频率由相邻两轮采样完成时间计算：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">feedback_hz = 1 / (本轮完成时间 − 上轮完成时间)</span><br></pre></td></tr></table></figure>
+
+<p>这是瞬时频率。串口应答、控制命令、遥测读取和操作系统调度都会影响它，不能把配置里的 30 当作稳定实测结果。</p>
+<p>网络端也需要保留源采样的新鲜度。刚收到一个 TCP 包，只能说明报文刚到，不能说明其中的关节数据刚采集。项目同时关注采样年龄、序号和通信状态，避免把积压旧帧作为新目标继续使用。</p>
+<h2 id="8-网络遥操：对齐之后再进入跟随"><a href="#8-网络遥操：对齐之后再进入跟随" class="headerlink" title="8. 网络遥操：对齐之后再进入跟随"></a>8. 网络遥操：对齐之后再进入跟随</h2><p>WBC 桥接通过 TCP 接收主臂数据，再转换为机器人控制侧的关节目标。网络连接建立后，系统还需要确认关节顺序、模式和反馈状态，才进入实际遥操作。</p>
+<p>以“从臂向主臂对齐”模式为例，流程可以表示为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">连接并协商模式</span><br><span class="line">      ↓</span><br><span class="line">读取新鲜主臂反馈</span><br><span class="line">      ↓</span><br><span class="line">锁定对齐目标，执行从臂对齐</span><br><span class="line">      ↓</span><br><span class="line">连续新采样确认主从角度满足容差</span><br><span class="line">      ↓</span><br><span class="line">READY</span><br><span class="line">      ↓ start</span><br><span class="line">TELEOP</span><br></pre></td></tr></table></figure>
+
+<p>对齐过程会驱动所选从臂。进入 READY 表示满足当前模式的对齐条件；输入 <code>start</code> 后才开始跟随。</p>
+<p>另一类模式用于让主臂对齐后保持上力，其验收后进入 HOLDING，保持目标姿态，并不输出 WBC 跟随流。这两类模式用途不同，两端必须使用匹配的配置。网络对齐命令与前面的软件零位标定命令虽然同名为 <code>align</code>，作用也完全不同。</p>
+<p>主从限位不一致时，可以显式启用目标裁剪：保留主臂实测角度，同时将发送目标裁剪到主臂模型与 WBC 有效范围的交集。这样才能解释“主臂继续推，但从臂停在边界”的现象。裁剪后的控制目标需要与原始测量分开记录。</p>
+<h3 id="主动推送与最新值缓存"><a href="#主动推送与最新值缓存" class="headerlink" title="主动推送与最新值缓存"></a>主动推送与最新值缓存</h3><p>除请求应答外，项目还实现了可选的主动推送。主臂网络线程读取最新快照发送，WBC 端保存最新缓存并按周期输出，应用层不逐帧排队回放历史动作。</p>
+<p>需要注意，缓存重用不能重置源数据年龄，也不能产生新的采样序号。调度迟到时跳过错过的周期，避免突然追发一串旧目标；TCP 本身的顺序传输和重传特性仍然存在。</p>
+<p>已有两台电脑之间的模拟端点测试，在人为延后心跳处理的条件下，4 秒稳态窗口的新帧接收与关节输出约为 29.99 Hz。这说明通信结构具有继续联调的基础，尚不能据此推导真实机器人端到端延迟。</p>
+<h2 id="9-第八轴作为夹爪输入"><a href="#9-第八轴作为夹爪输入" class="headerlink" title="9. 第八轴作为夹爪输入"></a>9. 第八轴作为夹爪输入</h2><p>七轴机械臂目标与夹爪输入分开处理，ID 8 不加入七轴关节数组。桥接根据夹爪原始刻度产生开合请求，并支持迟滞区间与单侧反向。</p>
+<p>例如，阈值为 2048、迟滞为 20 时，可以使用下面的规则：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">raw &gt; 2068       → 闭合</span><br><span class="line">raw &lt; 2028       → 打开</span><br><span class="line">2028 ≤ raw ≤ 2068 → 保持上一次目标</span><br></pre></td></tr></table></figure>
+
+<p>实际阈值应根据松开、握紧时的读数确定。迟滞能够避免输入在边界附近抖动时反复触发。左右装配方向不同时，可以只反转对应侧的开合映射，原始反馈和关节标定保持各自含义。</p>
+<p>夹爪动作还涉及执行中取消、反向请求和断线处理。当前相关状态机及模拟联调已有验证，真实夹爪动作仍需现场确认。</p>
+<h2 id="10-一次串口异常带来的排查经验"><a href="#10-一次串口异常带来的排查经验" class="headerlink" title="10. 一次串口异常带来的排查经验"></a>10. 一次串口异常带来的排查经验</h2><p>联调中曾出现这样的报错：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">设置扭矩 ID 6:</span><br><span class="line">[TxRxResult] Incorrect status packet!</span><br></pre></td></tr></table></figure>
+
+<p>随后网络客户端退出，WBC 才报告 TCP 断开。如果只看最后一条日志，很容易把故障归到网络层。</p>
+<p>按时间顺序检查后，可以确认最早的异常发生在主臂串口应答阶段。它表明 SDK 收到的状态包无法通过检查，现有日志还不足以区分接线、供电、应答时序等原因，更不能直接证明舵机损坏。</p>
+<p>这次排查让我更重视日志中的几个字段：侧别、舵机 ID、具体操作、请求值、通信错误，以及最后一份有效反馈的年龄。只有将这些信息串起来，才能判断故障起点和后续连锁结果。</p>
+<p>扭矩写入结果未知时，也不能根据“程序已经退出”推定设备已经卸力。设备状态需要依靠回读确认，失联情况下则无法仅凭软件保证。</p>
+<h2 id="11-与-OpenArm-Mini、SO-101-的关系"><a href="#11-与-OpenArm-Mini、SO-101-的关系" class="headerlink" title="11. 与 OpenArm Mini、SO-101 的关系"></a>11. 与 OpenArm Mini、SO-101 的关系</h2><p>这套七轴加夹爪的主臂形式，与 Open Arms Mini 的硬件配置高度吻合。其上游方案每侧使用八个 STS3215-C046 舵机，定位也是机器人遥操作主手。不过，现有本地机械模型缺少明确的来源声明，机械设计是否直接参考该项目，还需要原始 CAD 或设计记录确认。<a target="_blank" rel="noopener" href="https://github.com/pkooij/open-arms-mini">Open Arms Mini 上游项目</a></p>
+<p>飞特舵机也出现在 SO-101 生态中。SO-101 官方物料表包含 C001、C044、C046 等不同规格；现有 C046 可以考虑复用于采用该规格的主手关节，但一整套 C046 不能直接视为标准 SO-101 的等效配置。更换结构后仍要重新确认供电、装配、关节映射和标定。<a target="_blank" rel="noopener" href="https://github.com/TheRobotStudio/SO-ARM100#sourcing-parts">SO-101 官方项目</a></p>
+<p>这也提供了后续扩展方向：沿用已经建立的采集、标定和状态诊断能力，再对接 LeRobot 的示教数据采集流程。目前项目尚未完成 SO-101 接入或模仿学习训练。</p>
+<h2 id="12-当前进展与下一步"><a href="#12-当前进展与下一步" class="headerlink" title="12. 当前进展与下一步"></a>12. 当前进展与下一步</h2><p>目前，终端控制、双臂配置、模型映射、软件标定和 WBC 网络桥接已经形成实现基础；主动推送、目标裁剪及夹爪输入也有离线或模拟测试记录。</p>
+<p>接下来最值得投入的是三项验证：串口与扭矩切换的长期稳定性、主臂采样到从臂响应的端到端时延，以及不同姿态下的实际跟踪误差。它们能帮助判断现有系统在哪些条件下工作可靠，以及下一轮优化应落在串口采集、网络调度还是机器人控制侧。</p>
+<p>对我而言，这个项目最有价值的积累，是把编码器反馈、模型角度、网络目标和机器人执行之间的关系逐一明确下来。每层都有可检查的数据和状态，后续适配其他主臂或从臂时，才有稳定的基础可以复用。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://gitee.com/ftservo/FTServo_Python">飞特官方 FTServo Python SDK</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/pkooij/open-arms-mini">Open Arms Mini</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/TheRobotStudio/SO-ARM100">SO-101 &#x2F; SO-ARM100</a></li>
+</ul>
+</div>
+  </div>
+  <nav class="post-navigation" aria-label="文章导航">
+    <span></span>
+    
+      <a class="post-navigation__next" href="/2026/09/14/EtherCAT-IgH-vs-acontis-EC-Master/"><small>下一篇</small><span>EtherCAT主站：IgH EtherCAT Master（V1.6）与 acontis EC-Master (V3.3) 深度对比分析 →</span></a>
+    
+  </nav>
+
+  
+    <section class="comments-section" id="comments">
+      <div class="comments-header">
+        <p class="eyebrow"><span></span>INTERACTION / 讨论与互动</p>
+        <h2 class="comments-title">评论与表情点赞</h2>
+      </div>
+      <div class="giscus"></div>
+      <script src="https://giscus.app/client.js"
+        data-repo="zhuzq2020/zhuzq2020.github.io"
+        data-repo-id="R_kgDOMclcew"
+        data-category="General"
+        data-category-id="DIC_kwDOMclce84DFkX1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+      </script>
+    </section>
+  
+</article>
+
+    </main>
+    <script src="/js/zaki.js"></script>
+  </body>
+</html>
