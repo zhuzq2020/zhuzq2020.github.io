@@ -11,8 +11,8 @@
 
   const online = stats.querySelector('[data-online-widget]');
   const onlinePlaceholder = online.querySelector('[data-stats-placeholder]');
-  const uv = stats.querySelector('#busuanzi_site_uv');
-  const pv = stats.querySelector('#busuanzi_site_pv');
+  const uv = stats.querySelector('#vercount_value_site_uv');
+  const pv = stats.querySelector('#vercount_value_site_pv');
   let timedOut = false;
   const onlineLoaded = () => Boolean(online.querySelector('div, img, iframe, a'));
   const totalsLoaded = () => /^\d[\d,]*$/.test(uv.textContent.trim()) && /^\d[\d,]*$/.test(pv.textContent.trim());
@@ -38,6 +38,6 @@
   window._wau = window._wau || [];
   window._wau.push(['small', stats.dataset.onlineKey, 'zaki']);
   load('https://waust.at/s.js');
-  load('https://cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js');
+  load('https://events.vercount.one/js');
   setTimeout(() => { timedOut = true; update(); }, 12000);
 })();
