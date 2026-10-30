@@ -2,29 +2,6 @@
   const root = document.documentElement;
   const toggle = document.querySelector('.theme-toggle');
   const progress = document.querySelector('.reading-progress span');
-  const emailToggle = document.querySelector('.email-toggle');
-  const emailAddress = document.querySelector('#header-email-address');
-
-  if (emailToggle && emailAddress) {
-    const closeEmail = () => {
-      emailAddress.hidden = true;
-      emailToggle.setAttribute('aria-expanded', 'false');
-    };
-    emailToggle.addEventListener('click', () => {
-      emailAddress.hidden = !emailAddress.hidden;
-      emailToggle.setAttribute('aria-expanded', String(!emailAddress.hidden));
-    });
-    document.addEventListener('click', (event) => {
-      if (!emailToggle.parentElement.contains(event.target)) closeEmail();
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !emailAddress.hidden) {
-        closeEmail();
-        emailToggle.focus();
-      }
-    });
-  }
-
   const updateGiscusTheme = (theme) => {
     const iframe = document.querySelector('iframe.giscus-frame');
     if (!iframe || !iframe.contentWindow) return;

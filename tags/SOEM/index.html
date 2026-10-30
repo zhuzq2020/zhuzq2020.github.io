@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://zhuzq2020.github.io/tags/SOEM/index.html">
     <link rel="icon" href="/images/avatar.jpg">
     <link rel="stylesheet" href="/css/zaki.css">
-    <link rel="stylesheet" href="/css/academic.css">
+    <link rel="stylesheet" href="/css/academic.css?v=20261030-email-dialog">
     
     <script>
       (() => {
@@ -35,8 +35,12 @@
     <div class="header-actions">
       
         <div class="header-email">
-          <button class="social-link email-toggle" type="button" aria-label="Show email address" aria-expanded="false" aria-controls="header-email-address">MAIL <span aria-hidden="true">✉</span></button>
-          <div class="email-address" id="header-email-address" hidden>zhuzeqi2020@gmail.com</div>
+          <button class="social-link email-reveal" type="button" aria-label="Show email address" aria-haspopup="dialog" onclick="document.getElementById('contact-email-dialog').showModal()">MAIL <span aria-hidden="true">✉</span></button>
+          <dialog class="email-dialog" id="contact-email-dialog" aria-labelledby="contact-email-title">
+            <form method="dialog"><button class="email-dialog-close" type="submit" aria-label="Close email dialog" autofocus>×</button></form>
+            <h2 id="contact-email-title">Email</h2>
+            <p class="email-dialog-address">zhuzeqi2020@gmail.com</p>
+          </dialog>
         </div>
       
       <a class="social-link social-link--github" href="https://github.com/zhuzq2020" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub">GH <span>↗</span></a>
@@ -70,6 +74,6 @@
 </section>
 
     </main>
-    <script src="/js/zaki.js"></script>
+    <script src="/js/zaki.js?v=20261030-email-dialog"></script>
   </body>
 </html>
