@@ -1949,23 +1949,6 @@ a:focus-visible {
   flex-grow: 1;
 }
 
-/* Header MAIL Button */
-.social-link--mail {
-  color: var(--cyan);
-  border-color: color-mix(in srgb, var(--cyan) 30%, transparent);
-}
-
-.social-link--mail:hover {
-  color: var(--text);
-  border-color: var(--cyan);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 25%, transparent);
-}
-
-.social-link--mail span {
-  font-size: 13px;
-  margin-left: 4px;
-}
-
 /* Comments & Interactions Section */
 .comments-section {
   max-width: 926px;
